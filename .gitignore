@@ -1,3 +1,16 @@
+# Hidden files
+*~
+.DS_Store
+~$*
+.py*
+
+# figures output by code
+*/figures
+
+# miscellaneous notebook files
+core.dcc*
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
