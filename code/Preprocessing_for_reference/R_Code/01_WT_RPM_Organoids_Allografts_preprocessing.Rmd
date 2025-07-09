@@ -1,0 +1,191 @@
+---
+title: "Fig2 Preprocessing Notebook"
+output: html_notebook
+date: 2025-06-16
+author: "Abbie Ireland, Darren Tyson"
+---
+
+Code from Fig2_ExtFig4_WT_RPM_Organoids_Allografts_Final.R
+
+```{r}
+suppressPackageStartupMessages({
+    library(Seurat)
+    library(SeuratObject)
+    library(SummarizedExperiment)
+})
+```
+
+### RPM tracheal basal organoids only
+**Fig. 2d**  
+NOTE there are duplicate cell IDs in this dataset!
+
+Generate SingleCellExperiment from AnnData H5AD file. Alternative approached using anndataR or zellkonverter appear to work equivalently but with minor differences.  
+zellkonverter format:  
+* Keeps colnames as cell IDs, even though there are duplicates.  
+* Keeps `varm` in rowData names
+
+```
+class: SingleCellExperiment 
+dim: 55491 15837 
+metadata(10): Cre_colors UnID_colors ... rank_genes_groups umap
+assays(3): X counts norm
+rownames(55491): 4933401J01Rik Gm26206 ... GFP.CDS CellTag.UTR
+rowData names(16): gene_ids feature_types ... highly_variable_nbatches varm
+colnames(15837): AAACGCTCACACCGCA-1 AAACGCTGTAGAAACT-1 ... TTTGTTGGTGCAGGAT-1 TTTGTTGGTGCCTTCT-1
+colData names(15): Genotype Model ... cluster leiden_scVI_1.2
+reducedDimNames(4): X_pca X_scVI_1.1 X_scVI_1.2 X_umap
+mainExpName: NULL
+altExpNames(0):
+```
+anndataR format:
+Drops `varm`from rowData names, and renames colnames to 1, 2, ..., 15837 due to non-unique cell IDs.
+
+```
+class: SingleCellExperiment 
+dim: 55491 15837 
+metadata(10): Cre_colors UnID_colors ... rank_genes_groups umap
+assays(3): counts norm X
+rownames(55491): 4933401J01Rik Gm26206 ... GFP.CDS CellTag.UTR
+rowData names(15): gene_ids feature_types ... frac_zero highly_variable_nbatches
+colnames(15837): 1 2 ... 15836 15837
+colData names(0):
+reducedDimNames(4): X_pca X_scVI_1.1 X_scVI_1.2 X_umap
+mainExpName: NULL
+altExpNames(0):
+```
+
+```{r}
+# adata_fig2d <- anndataR::read_h5ad("../data/050125_RPM_WT_CTpostCre_CTpreCre_TBOs_adata2.h5ad")
+# sce_fig2d <-adata_fig2d$as_SingleCellExperiment()
+
+# Create a Seurat object from the SingleCellExperiment
+sce_fig2d_zk <- zellkonverter::readH5AD("../data/050125_RPM_WT_CTpostCre_CTpreCre_TBOs_adata2.h5ad")
+```
+
+```{r}
+table(sce_fig2d_zk$Cre)
+```
+
+### RPM allograft tumour cells only
+**Fig. 2e**  
+FEWER CELLS BC DOWNSAMPLED TO KEEP HETEROGENEITY/representation of rare clusters like the P cluster
+
+***Anndata object originally generated in scanpy/scVI [here](https://github.com/TGOliver-lab/Ireland_Basal_SCLC_2025/blob/main/Python_Code/Fig2e_ExtFig4e_RPM_Allos_Final_Clean.ipynb)***
+
+
+```{r}
+adata_fig2e <- anndataR::read_h5ad("../data/042725_RPM_TBOAllos_OriginalandAllo3_adata3_5kHVG_subsamplebycluster.h5ad")
+# sce_fig2e <- adata_fig2e$as_SingleCellExperiment()
+
+sce_fig2e_zk <- zellkonverter::readH5AD("../data/042725_RPM_TBOAllos_OriginalandAllo3_adata3_5kHVG_subsamplebycluster.h5ad")
+
+RPM_Allo <- CreateSeuratObject(counts = counts(sce_fig2e_zk), meta.data = as.data.frame(colData(sce_fig2e_zk)))
+# An object of class Seurat 
+# 55491 features across 4435 samples within 1 assay 
+# Active assay: RNA (55491 features, 0 variable features)
+# 1 layer present: counts
+
+# Create an assay of normalized gene expression
+RPM_Allo[["norm"]] <- CreateAssayObject(counts = assay(sce_fig2e_zk,"norm"))
+RPM_Allo <- NormalizeData(RPM_Allo)
+
+# Set assay norm as default assay for seurat object
+DefaultAssay(RPM_Allo) <- 'norm'
+```
+
+### Add UMAP metadata to Seurat object
+Add embeddings of umap, and X_scVI_1.3 to assay norm
+```{r}
+temp <- adata_fig2e$obsm$X_umap
+colnames(temp) <- c("UMAP_1","UMAP_2")
+rownames(temp) <- colnames(RPM_Allo)
+
+RPM_Allo[['umap']] <- CreateDimReducObject(temp, key="UMAP_", assay = "norm") # NOTE: this was 'RNA' in original code, even though comment above says 'norm'
+
+head(RPM_Allo[['umap']]@cell.embeddings)
+```
+
+
+```{r}
+DimPlot(object = seurat_fig2e, reduction = "umap", group.by = "UnID")
+DimPlot(object = seurat_fig2e, reduction = "umap", group.by = "Cre")
+
+# cowplot::plot_grid(p1, p2, ncol = 2, labels = c("UnID", "Cre"))
+```
+
+```{r}
+########################################################################
+# Assign states for Fig. 2f
+########################################################################
+# Tuft- 20
+# NE- 1, 2, 3, 5, 9, 11, 14, 16, 17, 18, 
+# NE/Neuronal-0, 8, 15, 19
+# Neuronal-10, 12, 13, 
+# Atoh1-4, 7
+# Basal-6
+
+RPM_Allo@meta.data$Pheno<- ifelse(RPM_Allo@meta.data$leiden_scVI_1.3 %in% c("20"), "Tuft",
+                                  ifelse(RPM_Allo@meta.data$leiden_scVI_1.3 %in% c("6"), "Basal",
+                                         ifelse(RPM_Allo@meta.data$leiden_scVI_1.3 %in% c("0","8","15","19"), "NE_Neuronal",
+                                                ifelse(RPM_Allo@meta.data$leiden_scVI_1.3 %in% c("1","2","3","5","9","11","14","16","17","18"), "NE",
+                                                       ifelse(RPM_Allo@meta.data$leiden_scVI_1.3 %in% c("10","12","13"), "Neuronal", "Atoh1")))))
+
+```
+
+
+
+### Generate SingleCellExperiment file for RPM_Allo
+```{r}
+RPM_Allo <- readRDS("../data/05_2025_RPM_AllograftOnly_Fig2e.rds")
+sce <- as.SingleCellExperiment(RPM_Allo, assay = "norm")
+```
+### Save the Seurat object
+```{r}
+if(!file.exists("../data/RPM_Allo_Fig2e.h5Seurat")) {
+    message("Saving RPM_Allo to ../data/RPM_Allo_Fig2e.h5Seurat")
+    SeuratDisk::SaveH5Seurat(RPM_Allo, filename = "../data/RPM_Allo_Fig2e.h5Seurat", overwrite = FALSE)
+} else {
+    message("File ../data/RPM_Allo_Fig2e.h5Seurat already exists, skipping save.")
+}
+
+```
+
+### Convert Seurat object to h5ad format
+```{r}
+sce_fig2e_v2 <- convert2anndata::convert_seurat_to_sce(RPM_Allo)
+```
+```{r}
+# Convert to AnnData and save
+ad <- convert2anndata::convert_to_anndata(sce_fig2e_v2, assayName = "norm", useAltExp = TRUE)
+
+# Save the AnnData object
+if(!file.exists("../data/RPM_Allo_only_v2.h5ad")) {
+    message("Saving ad to ../data/RPM_Allo_only_v2.h5ad")
+    anndata::write_h5ad(ad, "../data/RPM_Allo_only_v2.h5ad")
+} else {
+    message("File ../data/RPM_Allo_only_v2.h5ad already exists, skipping save.")
+}
+
+```
+
+
+### Save the SingleCellExperiment object
+```{r}
+if(!file.exists("../data/RPM_Allo_only.h5ad")) {
+    message("Saving sce to ../data/RPM_Allo_only.h5ad")
+    zellkonverter::writeH5AD(sce, "../data/RPM_Allo_only.h5ad")
+} else {
+    message("File ../data/RPM_Allo_only.h5ad already exists, skipping save.")
+}
+
+if(!file.exists("../data/RPM_Allo_only_sce.rds")) {
+    message("Saving sce to ../data/RPM_Allo_only_sce.rds")
+    saveRDS(sce, "../data/RPM_Allo_only_sce.rds")
+} else {
+    message("File ../data/RPM_Allo_only_sce.rds already exists, skipping save.")
+}
+```
+
+
+
+
