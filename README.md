@@ -1,10 +1,10 @@
 # Ireland_Basal_SCLC_2025
-#### Repository for code used in Ireland et al, _Manuscript in Review_, 2025. 
+#### Repository for code used in Ireland et al, _In Press at Nature_, 2025. 
 
 ## **Basal cell of origin resolves neuroendocrine-tuft lineage plasticity in cancer**
 
 #### Authors:
-Abbie S. Ireland<sup>1</sup>, Daniel Xie<sup>1</sup>, Sarah B. Hawgood<sup>1</sup>,  Margaret W. Barbier<sup>1</sup>, Scarlett Lucas-Randolph<sup>1</sup>, Darren R. Tyson<sup>1</sup>, Lisa Y. Zuo<sup>1</sup>, Benjamin L. Witt<sup>2</sup>, Ramaswamy Govindan<sup>3</sup>, Afshin Dowlati<sup>4</sup>, Justin C. Moser<sup>5</sup>, Anish Thomas<sup>6</sup>, Sonam Puri<sup>7</sup>, Charles M. Rudin<sup>8</sup>, Joseph M. Chan<sup>9</sup>, Andrew Elliott<sup>10</sup>, Trudy G. Oliver<sup>1*</sup>
+Abbie S. Ireland<sup>1</sup>, Daniel Xie<sup>1</sup>, Sarah B. Hawgood<sup>1</sup>,  Margaret W. Barbier<sup>1</sup>, Scarlett Lucas-Randolph<sup>1</sup>, Darren R. Tyson<sup>1</sup>, Lisa Y. Zuo<sup>1</sup>, Benjamin E. Hanna<sup>1</sup>, Benjamin L. Witt<sup>2</sup>, Ramaswamy Govindan<sup>3</sup>, Afshin Dowlati<sup>4</sup>, Justin C. Moser<sup>5</sup>, Anish Thomas<sup>6</sup>, Sonam Puri<sup>7</sup>, Charles M. Rudin<sup>8</sup>, Joseph M. Chan<sup>9</sup>, Andrew Elliott<sup>10</sup>, Trudy G. Oliver<sup>1*</sup>
 
 #### Affiliations:	
 <sup>1</sup>Department of Pharmacology and Cancer Biology, Duke University, Durham, NC, 27710, USA;
@@ -30,7 +30,7 @@ Data are accessible on GEO, under Superseries [GSE279200](https://www.ncbi.nlm.n
 Raw data are provided as FASTQ and processed CellRanger count filtered barcodes, features, and matrices. 
   
 ## Code
-Code to replicate analyses performed in [Ireland et al. *Manuscript in Review* 2025]
+Code to replicate analyses performed in [Ireland et al. *Nature* 2025]
 
 1. Download raw or processed data from NCBI GEO [here](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE279200).
 2. See Jupyter Notebooks and R scripts above for manuscript specific dataset integration methods and analyses. All samples were first subject to Scanpy/scVI-based QC and clustering in Python, and processed anndata objects were saved. R scripts call in the resulting anndata objects and convert them to Seurat objects for additional analyses. Many files called in R scripts are included in the metadata_files folder.
