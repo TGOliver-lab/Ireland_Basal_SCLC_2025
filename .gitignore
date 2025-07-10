@@ -4,6 +4,36 @@
 ~$*
 .py*
 
+# R-specific
+.Rproj.user
+.Rhistory
+.Rpro*
+
+# large data files
+data/021825_RPM_CGRPvK5_adata3.h5ad
+data/030525_RPM_RPMA_WT_Organoids_forCellTagwStates.h5ad
+data/042725_RPM_TBOAllos_OriginalandAllo3_adata3_5kHVG_subsamplebycluster.h5ad
+data/05_2025_RPM_RPMA_TBOAllo_CellTagClones_Onlyclones.rds
+data/05_2025_RPM_RPMA_TBO_CellTag_Seurat_wSigs_FA_dpt_final.rds
+data/05_2025_RPM_AllograftOnly_Fig2e.rds
+data/05_2025_RPM_Orgs_Allo_Fig2d.rds
+data/05_2025_RPM_Orgs_Only_ExtFig4a-c.rds
+data/05_2025_RPMK5vCGRP_Norm_Allsigs_New.rds
+data/05_2025_RPMvRPR2_Allografts_Final.rds
+data/050125_RPM_RPMA_TBOAllo_CellTagAnalysis_New_1.2_fate_FAprojection_DPT_final.h5ad
+data/050125_RPM_WT_CTpostCre_CTpreCre_TBOs_adata2.h5ad
+data/050325_RPM_Orgs_Allos_Updated_adata3.h5ad
+data/050925_RPM_TBOAllo_OriginalandAllo3_RPR2_adata2.h5ad
+data/07_2025_RPM_RPMA_TBO_CellTag_Seurat_wSigs_FA_dpt_final.rds
+data/RPM_Allo*
+data/RPM_K5vCGRP_complete.h5ad
+data/RPM_K5vCGRP_Seurat.Rds
+data/RPM_RPMA_Allo_CT_Fig3h.h5ad
+data/RPMK5vCGRP_Norm_Allsigs_obs.csv
+data/RPMK5vCGRP_Norm_Allsigs.h5Seurat
+data/RPM_TBO_allografts_complete.h5ad
+
+
 # figures output by code
 */figures
 

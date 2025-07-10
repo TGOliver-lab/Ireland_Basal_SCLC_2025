@@ -6,20 +6,20 @@ output: html_notebook
 ---
 
 ### Modifying original code
-Original file: `Fig3_4_6_ExtFig5-6-10_RPM_RPMA_Allos_CellTag.R` 
-[Fig3_4_6_ExtFig5-6-10_RPM_RPMA_Allos_CellTag.R file on GitHub](https://github.com/TGOliver-lab/Ireland_Basal_SCLC_2025/blob/main/R_Code/Fig3_4_6_ExtFig5-6-10_RPM_RPMA_Allos_CellTag.R)  
 
-This notebook is modified from the original code to remove the preprocessing steps 
-and show figures inline within the notebook.    
+Original file: [Fig3_4_6_ExtFig5-6-10_RPM_RPMA_Allos_CellTag.R](Preprocessing_for_reference/R_Code/Fig3_4_6_ExtFig5-6-10_RPM_RPMA_Allos_CellTag.R)
 
-There is a separate notebook for the CellTag analysis.
+This notebook is modified from the original code to remove the preprocessing steps and show figures inline within the notebook.
+
+There is a [separate notebook for the CellTag analysis](04_RPM_RPMA_Allos_CellTag_notebook.nb.html).  
 
 ### Related to:
-* Fig 2e-l
-* Fig 5d-h
-* Extended Data Fig 5c,e
-* Extended Data Fig 6a
-* Extended Data Fig 10e
+
+-   Fig 2e-l
+-   Fig 5d-h
+-   Extended Data Fig 5c,e
+-   Extended Data Fig 6a
+-   Extended Data Fig 10e
 
 ```{r}
 suppressPackageStartupMessages({
@@ -32,14 +32,17 @@ suppressPackageStartupMessages({
 ```
 
 ### Load the Seurat object and CellTag clones
+
 ```{r}
-TBO_seurat<-readRDS("../data/05_2025_RPM_RPMA_TBO_CellTag_Seurat_wSigs_FA_dpt_final.rds")
+TBO_seurat<-readRDS("../data/07_2025_RPM_RPMA_TBO_CellTag_Seurat_wSigs_FA_dpt_final.rds")
 TBO_seurat
 
 clones <- readRDS("../data/05_2025_RPM_RPMA_TBOAllo_CellTagClones_Onlyclones.rds")
 clones
 ```
+
 ### Load organoid data as SingleCellExperiment
+
 ```{r}
 sce <- as.SingleCellExperiment(TBO_seurat, assay = "norm")
 ```
@@ -49,8 +52,8 @@ phenotypes <- as.character(unique(sce@colData@listData$Pheno))
 pheno_pairs_list <- combn(phenotypes, 2, simplify = FALSE)
 ```
 
-
 ### Define color palettes
+
 ```{r}
 my_colors <- c(
   "#E41A1C", # strong red
@@ -77,10 +80,13 @@ my_colors <- c(
 )
 
 ```
+
 #### Define function to plot violin plots by phenotype
-Copied from [02_WT_RPM_Organoids_Allografts_notebook.Rmd](02_WT_RPM_Organoids_Allografts_notebook.Rmd)  
+
+Copied from [02_WT_RPM_Organoids_Allografts_notebook.Rmd](02_WT_RPM_Organoids_Allografts_notebook.Rmd)
 
 Needs SingleCellExperiment `sce` object and `pheno_pairs_list` defined in the notebook.
+
 ```{r}
 plotVlnByPhen <- function(feature, yl=c(-0.1,0.3), focus=NA) {
     if(!is.na(focus)) {
@@ -111,6 +117,7 @@ plotVlnByPhen <- function(feature, yl=c(-0.1,0.3), focus=NA) {
 ```
 
 ### Fig. 2e UMAP
+
 ```{r fig.height=6, fig.width=7, message=FALSE, warning=FALSE}
 DimPlot(TBO_seurat, group.by='Genotype', cols=c("darkorchid4","orange"),
         pt.size = 0.1,
@@ -119,6 +126,7 @@ DimPlot(TBO_seurat, group.by='Genotype', cols=c("darkorchid4","orange"),
 ```
 
 ### Fig. 2f (UMAP by Leiden cluster)
+
 ```{r fig.height=6, fig.width=6, message=FALSE, warning=FALSE}
 DimPlot(TBO_seurat, group.by='leiden_scVI_1.2', 
         cols=my_colors, reduction='umap', label=TRUE, label.size=5,
@@ -126,7 +134,6 @@ DimPlot(TBO_seurat, group.by='leiden_scVI_1.2',
     theme(legend.position="none")
 
 ```
-
 
 ```{r fig.height=8, fig.width=10, message=FALSE, warning=FALSE}
 Idents(TBO_seurat) <- 'leiden_scVI_1.2'
@@ -143,6 +150,7 @@ colnames(proportions) <- c("Sample", "Cluster", "Frequency")
 ```
 
 #### Fig 2f
+
 ```{r fig.height=3.5, fig.width=3.5, message=FALSE, warning=FALSE}
 # Stacked
 p <- ggplot(proportions, aes(fill=Cluster, y=Frequency, x=Sample)) + 
@@ -156,8 +164,10 @@ p + scale_fill_manual(values=my_colors) + theme_bw() +
     labs(x = NULL, y = "Sample composition (%)")
 ```
 
-### Fig. 2h 
+### Fig. 2h
+
 UMAP colored by SCLC fate
+
 ```{r fig.height=6, fig.width=7, message=FALSE, warning=FALSE}
 # Define fate color vector and use to plot by cell state
 pheno_col <- c("brown2","darkorchid4","dodgerblue","#66A61E","orange","turquoise4","turquoise")
@@ -165,6 +175,7 @@ DimPlot(TBO_seurat, group.by='Pheno', cols=pheno_col, reduction='umap', label=FA
         shuffle=TRUE, label.size=6) & NoAxes()
 
 ```
+
 #### Fig. 2h (stacked barplot by Pheno)
 
 ```{r fig.height=4, fig.width=4, message=FALSE, warning=FALSE}
@@ -187,18 +198,22 @@ p + scale_fill_manual(values=pheno_col) + theme_bw() +
 ```
 
 #### Fig. 2i UMAP
+
 NE score (correlation)
+
 ```{r fig.height=3, fig.width=3.5, message=FALSE, warning=FALSE}
 FeaturePlot(TBO_seurat, features = c("NE_spearman"), pt.size=0.2,
             reduction='umap') + viridis::scale_color_viridis(option="rocket",direction=-1) & NoAxes()
 ```
 
 #### Fig 2i (violin plots of NE score by SCLC fate)
+
 ```{r fig.height=4, fig.width=3, message=FALSE, warning=FALSE}
 plotVlnByPhen("NE_spearman", yl=c(-.7, .8))
 ```
 
 #### Fig 2i (violin plots of NE score by genotype)
+
 ```{r fig.height=3, fig.width=2, message=FALSE, warning=FALSE}
 x <- scater::plotColData(sce, x = "Genotype", y = "NE_spearman", colour_by = "Genotype") + 
     scale_discrete_manual(aesthetics = c("colour", "fill"), values=c("darkorchid4","orange"))
@@ -223,13 +238,13 @@ x + stat_summary(fun = mean,
 
 ```
 
+### Fig. 2j
 
-### Fig. 2j 
 #### Fig 2j (UMAP marker gene expression)
-Equivalent color schemes:  
-* `viridis::scale_color_viridis(option="rocket", direction=-1)`  
-* `scale_color_gradientn(colors=viridis::rocket(10, direction=-1))`
 
+Equivalent color schemes:\
+\* `viridis::scale_color_viridis(option="rocket", direction=-1)`\
+\* `scale_color_gradientn(colors=viridis::rocket(10, direction=-1))`
 
 ```{r fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
 # TF target gene scores in UMAP
@@ -246,9 +261,10 @@ FeaturePlot(TBO_seurat, features = c("YAP_Activity1"), pt.size=0.2,
 
 ```
 
-
 ### VlnPlots by genotype with wilcoxon rank sum tests
+
 #### Fig. 2j (violin plots)
+
 ```{r}
 plotTFscoresVln <- function(score_name, yl=c(-.1, .32)) {
     a <- VlnPlot(TBO_seurat,
@@ -279,7 +295,9 @@ plotTFscoresVln <- function(score_name, yl=c(-.1, .32)) {
     return(a)
 }
 ```
+
 #### Fig 2j (insets)
+
 ```{r fig.height=3, fig.width=3, message=FALSE, warning=FALSE}
 plotTFscoresVln("ATOH1_Targets1")
 plotTFscoresVln("ASCL1_Targets1", yl=c(-0.1, 0.8))
@@ -289,6 +307,7 @@ plotTFscoresVln("YAP_Activity1", yl=c(-0.1, 1))
 ```
 
 ### Fig. 2k (UMAP by cell type consensus signature)
+
 ```{r fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
 FeaturePlot(TBO_seurat, features = c("NE_Consensus1"), pt.size=0.2, 
             reduction='umap') + viridis::scale_color_viridis(option="rocket",direction=-1) & NoAxes()
@@ -299,12 +318,15 @@ FeaturePlot(TBO_seurat, features = c("Tuft_Consensus1"), pt.size=0.2,
 ```
 
 ### Fig. 2k (violin plots of consensus signatures by SCLC fate)
+
 ```{r fig.height=4, fig.width=3, message=FALSE, warning=FALSE}
 plotVlnByPhen("NE_Consensus1", yl=c(-0.5, 1.3))
 plotVlnByPhen("Tuft_Consensus1", yl=c(-0.25, 1))
 plotVlnByPhen("Basal_Consensus1", yl=c(-0.1, 1.1))
 ```
+
 #### Fig 2l (violin plots of SCLC arhcetype scores by phenotype)
+
 ```{r fig.height=4, fig.width=3, message=FALSE, warning=FALSE}
 plotVlnByPhen("A_Archetype1", yl=c(-0.05, 0.27))
 plotVlnByPhen("A2_Archetype1", yl=c(-0.05, 0.2))
@@ -313,6 +335,7 @@ plotVlnByPhen("P_Archetype1", yl=c(0, 0.27))
 ```
 
 #### Ext Data Fig 5c
+
 ```{r}
 plotStackedBarByGeno <- function(gene, lab) {
     dat <- FetchData(TBO_seurat, vars = c(gene, "Genotype"))
@@ -342,10 +365,10 @@ plotStackedBarByGeno("Neurod1", "Fraction of Neurod1-hi cells (>0.01)")
 plotStackedBarByGeno("Pou2f3", "Fraction of Pou2f3-hi cells (>0.01)")
 ```
 
-
-
 ### Extended Data Fig. 5e
+
 Violin plots of expression of TFs by Leiden cluster
+
 ```{r fig.height=4, fig.width=10, message=FALSE, warning=FALSE}
 genes <- c("Ascl1","Neurod1","Pou2f3")
 
@@ -371,8 +394,8 @@ plots <- lapply(genes, function(gene) {
 patchwork::wrap_plots(plots, ncol = 3)
 ```
 
-
 #### Ext Data Fig 10
+
 ```{r fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
 FeaturePlot(TBO_seurat, features = c("Iono_Mouse_Ext1"), pt.size=0.2,
             reduction='umap') + viridis::scale_color_viridis(option="rocket",direction=-1) & NoAxes()
@@ -380,25 +403,27 @@ FeaturePlot(TBO_seurat, features = c("Iono_Human1"), pt.size=0.2,
             reduction='umap') + viridis::scale_color_viridis(option="rocket",direction=-1) & NoAxes()
 ```
 
-
 ### Ext Data Fig. 10e (violin plots of consensus signatures by SCLC fate)
+
 ```{r fig.height=4, fig.width=3, message=FALSE, warning=FALSE}
 plotVlnByPhen("Iono_Mouse_Ext1", yl=c(-0.1, 0.45))
 plotVlnByPhen("Iono_Human1", yl=c(-0.1, .75))
 ```
 
 #### Fig 5d
+
 Caris SCLC tumor signatures in basal cells
+
 ```{r fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
 caris_feat <-  c("Caris_A1","Caris_Y1","Caris_N1","Caris_Mixed1","Caris_P1","Caris_TN-1")
-
+library(viridis)
 v <- FeaturePlot(TBO_seurat, features = caris_feat, pt.size=0.2, reduction='umap') 
 v <- lapply(v, `+`, scale_color_viridis(option="rocket", direction=-1))
 lapply(v, `+`, NoAxes())
 ```
 
-
 #### Fig 5d (violin plots of human tumor SCLC scores by SCLC fate)
+
 ```{r fig.height=4, fig.width=3.5, message=FALSE, warning=FALSE}
 plotVlnByPhen("Caris_A1", yl=c(-0.1, 0.2))
 plotVlnByPhen("Caris_Y1", yl=c(-0.1, 0.2))
@@ -408,18 +433,17 @@ plotVlnByPhen("Caris_P1", yl=c(-0.1, 0.25))
 plotVlnByPhen("Caris_TN.1", yl=c(-0.1, 0.25))
 ```
 
-
-
 #### Fig. 5e
+
 Gene signature scores correlation heatmap
+
 ```{r fig.height=8, fig.width=9}
 signature_matrix <- FetchData(TBO_seurat, vars = c("Caris_A1", "George_A1", "Liu_A1","Lissa_A1","ASCL1_Targets1",
                                                    "Caris_N1","George_N1", "Liu_N1","Lissa_N1", "NEUROD1_Targets1",
                                                    "Caris_P1","George_P1", "Liu_P1","POU2F3_Targets1",
                                                    "Caris_Y1","George_Y1", "Lissa_Y1", "YAP_Activity1",
-                                                   "Gay_SCLC-I1","MHC_Sig_Gay1",
+                                                   "T_Cell_Inflamed_Gay1","MHC_Sig_Gay1",
                                                    "NE_Consensus1","Basal_Consensus1","Tuft_Consensus1"))
-# replace Gay_SCLC-I1 with T_Cell_Inflamed_Gay1
 
 # Compute Pearson correlation matrix
 correlation_matrix <- cor(signature_matrix, method = "pearson")
@@ -435,7 +459,9 @@ pheatmap::pheatmap(correlation_matrix,
 ```
 
 #### Fig 5g
+
 Inflammatory signatures in basal cells
+
 ```{r fig.height=3, fig.width=4, message=FALSE, warning=FALSE}
 # Fig 5g feature plot (MHC_Sig_Gay1="Antigen presentation") #
 FeaturePlot(TBO_seurat, features = c("MHC_Sig_Gay1"), pt.size=0.2, 
@@ -451,16 +477,16 @@ FeaturePlot(TBO_seurat, features = c("Gay_SCLC-I1"), pt.size=0.2,
 
 ```
 
-
 #### Fig 5g (violin plots of inflammation scores by SCLC fate)
+
 ```{r fig.height=4, fig.width=3.5, message=FALSE, warning=FALSE}
 plotVlnByPhen("MHC_Sig_Gay1", yl=c(-0.1, 0.8))
 plotVlnByPhen("NMF3.I1", yl=c(-0.1, 0.5))
 plotVlnByPhen("Gay_SCLC.I1", yl=c(-0.1, 0.3))
 ```
 
-
 #### Fig 5h (violin plots of therapeutic target gene expression by SCLC fate)
+
 ```{r fig.height=2.5, fig.width=8}
 x_labs <- c("A","A/N","N","At","P","SL","B")
 
@@ -472,13 +498,14 @@ v <- lapply(v,  `+`,  scale_x_discrete(labels=x_labs))
 
 patchwork::wrap_plots(v, ncol=4)
 ```
+
 #### Ext Data Fig 6a
+
 ```{r fig.height=4, fig.width=5}
 DimPlot(TBO_seurat, group.by='GenoCT', cols=my_colors, shuffle=TRUE, 
         reduction='umap', label=FALSE, label.size=6) & NoAxes() + NoLegend()
 DimPlot(TBO_seurat, group.by='GenoCT', cols=my_colors, shuffle=TRUE, 
         reduction='fa', label=FALSE, label.size=6) & NoAxes() + NoLegend()
 ```
-
 
 ### CellTag analysis in other notebook

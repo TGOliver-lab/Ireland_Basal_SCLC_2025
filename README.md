@@ -36,6 +36,13 @@ Code to replicate analyses performed in [Ireland et al. *Nature* 2025]
 2. See Jupyter Notebooks and R scripts above for manuscript specific dataset integration methods and analyses. All samples were first subject to Scanpy/scVI-based QC and clustering in Python, and processed anndata objects were saved. R scripts call in the resulting anndata objects and convert them to Seurat objects for additional analyses. Many files called in R scripts are included in the metadata_files folder.
 3. Please refer to [Scanpy](https://scanpy.readthedocs.io/en/stable/), [scvi-tools](https://docs.scvi-tools.org/en/stable/tutorials/index.html), [Single-cell best practices](https://www.sc-best-practices.org/), [CellTagR](https://github.com/morris-lab/CellTagR) and [CellRank](https://cellrank.readthedocs.io/en/stable/notebooks/tutorials/general/100_getting_started.html) tutorials for system requirements and package-specific code that was adapted for datasets in this manuscript. 
 
+#### Note 
+To install necessary packages for executing Python code we recommend using the `scrnaseq312` conda environment that can be set up using the following (assuming you are in the top directory of this repository):
+
+```
+conda env create -f scrnaseq312.yaml
+```
+
 ## Contact
 Please consult methods described in our manuscript for more details or contact corresponding author for specific requests.
 

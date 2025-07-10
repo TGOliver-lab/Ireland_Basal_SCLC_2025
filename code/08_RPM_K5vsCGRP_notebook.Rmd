@@ -1,0 +1,290 @@
+---
+title: "Extended Data RPM K5 vs CGRP notebook"
+output: html_notebook
+date: "2025-06-17"
+author: "Abbie Ireland, Darren Tyson"
+---
+
+Modified from original file [Fig1_ExtFig2_RPMK5vsCGRP_Primary_Final.R](Preprocessing_for_reference/R_Code/Fig1_ExtFig2_RPMK5vsCGRP_Primary_Final.R)  
+
+### Related to
+* Extended Data Fig 2g-o
+
+### Load the necessary libraries
+```{r}
+suppressPackageStartupMessages({ 
+    library(tidyverse)
+    library(ggplot2)
+    library(cowplot)
+    library(Seurat)
+    library(viridis)
+    library(ggpubr)
+    library(dplyr)
+    library(FSA)       # For dunnTest
+    library(rstatix)   # Optional, nice formatting of results
+    library(patchwork)
+    library(gridExtra)
+})
+```
+###  P star function
+```{r}
+# Function to assign p-value stars
+get_p_stars <- function(p) {
+    if (p < 0.0001) return("****")
+    else if(p < 0.001) return("***")
+    else if (p < 0.01) return("**")
+    else if (p < 0.05) return("*")
+    else return("ns")
+}
+```
+### Load the data
+```{r}
+# RPM_K5vCGRP <- readRDS("../data/05_2025_RPMK5vCGRP_Norm_Allsigs_New.rds") # original AI
+RPM_K5vCGRP <- readRDS("../data/RPM_K5vCGRP_Seurat.Rds") # From BasalDataCleanup_20250612.ipynb
+```
+
+```{r}
+unid_cols <- c("darkorchid4","orange")
+```
+
+
+### Plot UMAP of samples
+#### Ext Data Fig 2g
+```{r fig.height=3, fig.width=4}
+DimPlot(RPM_K5vCGRP, group.by='Cre', cols=unid_cols, reduction='umap', shuffle=TRUE) + NoAxes()
+```
+#### Ext Data Fig 2g
+```{r fig.height=3, fig.width=6}
+DimPlot(RPM_K5vCGRP, split.by='Cre', group.by='Cre', cols=unid_cols, reduction='umap', shuffle=TRUE) + NoAxes()
+```
+
+### ANP expr by Cre
+#### Ext Data Fig. 2h
+```{r message=FALSE, warning=FALSE}
+plots <- VlnPlot(
+    RPM_K5vCGRP, 
+    features = c("Ascl1", "Neurod1", "Pou2f3"), 
+    same.y.lims = FALSE, 
+    group.by = "Genotype", 
+    split.by = "Cre", 
+    split.plot = TRUE, 
+    cols = c("darkorchid4", "orange"), 
+    pt.size = 0.01
+)
+
+# Apply theme to all plots
+plots <- lapply(plots, function(p) {
+    p + theme(axis.title.x = element_blank(),
+              axis.text.x = element_text(angle = 45, hjust = 1))
+})
+
+# Combine with patchwork
+wrap_plots(plots, ncol = 3)
+```
+
+### Leiden clustering
+#### Ext Data Fig 2i
+```{r fig.height=3, fig.width=4}
+# Plots to generate Fig 1i
+# UMAP by Leiden cluster
+colors<-c('#F39B7F99','brown1','#ff7f0e', 'turquoise', '#2ca02c', 'deepskyblue4', '#e7298a',  '#0aa6d8',  '#A0522D', '#a1c299', 'gold', '#984ea3', '#3C548899', '#377eb8',  '#d62728','navyblue', '#a1c299', 'purple','gray','maroon','gray20')
+
+DimPlot(RPM_K5vCGRP,group.by='leiden_scVI_1.3', cols=colors, reduction='umap', label=TRUE, label.size=6) + NoAxes()
+```
+
+### What % of cells occupy each cluster for each sample?
+```{r}
+Idents(RPM_K5vCGRP)<-'Cre'
+
+x <- table(Idents(RPM_K5vCGRP),RPM_K5vCGRP@meta.data$leiden_scVI_1.3)
+proportions <- as.data.frame(100*prop.table(x, margin = 1))
+
+colnames(proportions) <- c("Cluster", "Sample", "Frequency")
+```
+
+
+#### Stacked bar charts
+```{r fig.height=5, fig.width=4}
+p <- ggplot(proportions, aes(fill=Sample, y=Frequency, x=Cluster)) + 
+    geom_bar(position="stack", stat="identity")
+
+p + scale_fill_manual(values=colors) + theme_bw() + 
+    theme(axis.text.y = element_text(size=20), 
+          axis.text.x = element_text(size=20, angle=45, vjust=1, hjust=1), 
+          axis.title.x = element_text(size=20), 
+          axis.title.y = element_text(size=20), 
+          legend.text = element_text(size=20), 
+          legend.title = element_blank()) + 
+    labs( x = NULL, y = "Frequency (%)")
+
+```
+
+
+
+#### Function to plot expression as Violin plot by Cre type
+```{r}
+plotVlnFeatureByCre <- function(feature, seurat_obj=RPM_K5vCGRP, y_max=NA, tit=NA) {
+    if(is.na(tit)) tit <- feature
+    a <- VlnPlot(seurat_obj, features = c(feature), 
+                 group.by=c("Cre"), same.y.lims=FALSE, 
+                 cols=c("darkorchid4","orange"), pt.size=.01,
+                 alpha=0.05, ncol=1, y.max=y_max)
+    # Add mean point and do wilcoxon rank sum test 
+    a + stat_summary(fun = mean,
+                     geom = "point",
+                     shape = 18,
+                     size = 2,
+                     color = "yellow",
+                     position = position_dodge(width = 0.9)) + 
+        ggtitle(tit) + 
+        theme(axis.title.x = element_blank()) + 
+        stat_compare_means(method = "wilcox.test", 
+                           label = "p.signif",
+                           hide.ns = TRUE,
+                           comparisons = list(c("CGRP", "K5"))) +
+        theme(legend.position = "none")
+}
+```
+
+
+#### Function to plot expression level by Leiden cluster
+```{r}
+plotVlnFeatureByLeiden <- function(feature, tit=NA){
+    a <- VlnPlot(RPM_K5vCGRP, features = feature, 
+                 group.by=c("leiden_scVI_1.3"), same.y.lims=FALSE, cols=colors, 
+                 pt.size=.01, alpha=0.05, ncol=1)
+    # Add mean point
+    a + stat_summary(fun = mean,
+                     geom = "point",
+                     shape = 18,
+                     size = 2,
+                     color = "red",
+                     position = position_dodge(width = 0.9)) + 
+        ggtitle(tit) + 
+        labs(x = "Leiden cluster", y = "Expression") +
+        theme(legend.position = "none")
+    
+}
+
+```
+
+
+
+## Generate violin plot by Cre
+
+### A, N, P ChIP target genes as scores
+#### Ext. Data. Fig. 2j
+```{r fig.height=4, fig.width=2}
+plotVlnFeatureByCre(feature="ASCL1_Targets1", tit="ASCL1")
+plotVlnFeatureByCre(feature="NEUROD1_Targets1", tit="NEUROD1")
+plotVlnFeatureByCre(feature="POU2F3_Targets1", tit="POU2F3")
+
+```
+
+
+#### Ext Data Fig 2k
+Neuroendocrine score (Spearman correlation coefficient) 
+```{r fig.height=4, fig.width=3}
+plotVlnFeatureByCre(feature="NE_spearman", tit="NE score")
+```
+
+#### Ext. Data. Fig. 2l
+SCLC archetypes (Groves et al., 2022)
+```{r fig.height=4, fig.width=2}
+plotVlnFeatureByCre(feature="A_Archetype1", tit="A")
+plotVlnFeatureByCre(feature="A2_Archetype1", tit="A2")
+plotVlnFeatureByCre(feature="N_Archetype1", tit="N")
+plotVlnFeatureByCre(feature="P_Archetype1", tit="P")
+```
+
+#### Statistics of variation of expression among Leiden clusters
+```{r}
+# Extract the data
+expr_values <- FetchData(RPM_K5vCGRP, vars = c("A2_Archetype1", "leiden_scVI_1.3"))
+
+# Rename columns for convenience
+colnames(expr_values) <- c("expression", "group")
+
+# Run Kruskal-Wallis test
+kruskal_result <- kruskal.test(expression ~ group, data = expr_values)
+
+# If significant, do Dunn's test (if set method to "none", that would be uncorrected)
+if (kruskal_result$p.value < 0.05) {
+  dunn_result <- dunnTest(expression ~ group, data = expr_values, method = "none")
+  print(dunn_result)
+}
+
+# Convert to data frame if needed
+dunn_df <- dunn_result$res
+
+# Apply function to create a new column
+dunn_df$p_stars <- sapply(dunn_df$P.adj, get_p_stars)
+
+# View result, Use p-val stars to annotate plots
+print(dunn_df)
+```
+
+#### Extended Data Fig. 2m
+Human A N P scRNA seq sigs from Chan et al 
+```{r fig.height=4, fig.width=2}
+plotVlnFeatureByCre(feature="hSCLC_A1", tit="SCLC-A")
+plotVlnFeatureByCre(feature="hSCLC_N1", tit="SCLC-N")
+plotVlnFeatureByCre(feature="hSCLC_P1", tit="SCLC-P")
+```
+
+#### Ext Data Fig 2n
+```{r fig.height=6, fig.width=5, message=FALSE, warning=FALSE}
+Idents(RPM_K5vCGRP) <- 'Cre'
+
+x <- table(Idents(RPM_K5vCGRP),RPM_K5vCGRP@meta.data$leiden_scVI_1.3)
+proportions <- as.data.frame(100*prop.table(t(x), margin = 1))
+
+colnames(proportions) <- c("Cluster", "Sample", "Frequency")
+
+ggplot(proportions, aes(fill=Sample, y=Frequency, x=Cluster)) +
+    geom_bar(position="stack", stat="identity") + 
+    scale_fill_manual(values=unid_cols) + theme_bw() + 
+    theme(axis.text.y = element_text(size=20), 
+          axis.text.x=element_text(size=20), 
+          axis.title.x =element_text(size=20), 
+          axis.title.y = element_text(size=20), 
+          legend.text = element_text(size=20), 
+          legend.title = element_text(size=20)) + NoLegend() +
+    labs(x = "Leiden cluster", y = "% of cluster")
+
+```
+
+
+#### Ext Data Fig 2o
+```{r fig.height=3, fig.width=4}
+plotVlnFeatureByLeiden(feature="A2_Archetype1", tit="SCLC-A2 archetype")
+plotVlnFeatureByLeiden(feature="Basal_hillock1", tit="Basal hillock")
+plotVlnFeatureByLeiden(feature="Luminal_hillock1", tit="Luminal hillock")
+```
+
+### Perform kruskal-wallis test and post-hoc dunn's
+Related to Fig. 2o
+```{r}
+# Extract the data
+expr_values <- FetchData(RPM_K5vCGRP, vars = c("Luminal_hillock1", "leiden_scVI_1.3"))
+
+# Rename columns for convenience
+colnames(expr_values) <- c("expression", "group")
+
+# Run Kruskal-Wallis test
+kruskal_result <- kruskal.test(expression ~ group, data = expr_values)
+
+# If significant, do Dunn's test (if set method to "none", that would be uncorrected)
+if (kruskal_result$p.value < 0.05) {
+  dunn_result <- dunnTest(expression ~ group, data = expr_values, method = "bonferroni")
+}
+
+# Convert to data frame if needed
+dunn_df <- dunn_result$res
+
+# Apply function to create a new column
+dunn_df$p_stars <- sapply(dunn_df$P.adj, get_p_stars)
+head(dunn_df)
+```
+
+

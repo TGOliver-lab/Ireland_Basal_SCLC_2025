@@ -1,0 +1,26 @@
+name: scrnaseq312
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.12
+  - scanpy
+  - cellrank
+  - seaborn
+  - jupyterlab
+  - ipywidgets
+  - pandas
+  - numpy
+  - cmocean
+  - scvi-tools
+  - python-igraph
+  - leidenalg
+  - scrublet
+  - gseapy
+  - pip
+  - pip:
+    - scvelo
+    - fa2-modified # ForceAtlas2
+    - scikit-misc
+    - GEOparse
+

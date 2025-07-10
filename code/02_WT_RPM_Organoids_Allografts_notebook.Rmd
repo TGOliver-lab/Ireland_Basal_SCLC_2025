@@ -5,7 +5,7 @@ date: 2025-06-16
 author: "Abbie Ireland, Darren Tyson"
 ---
 
-Modifying [Original file (Fig2_ExtFig4_WT_RPM_Organoids_Allografts_Final.R) on GitHub](https://github.com/TGOliver-lab/Ireland_Basal_SCLC_2025/blob/main/R_Code/Fig2_ExtFig4_WT_RPM_Organoids_Allografts_Final.R) to generate an RMarkdown Notebook
+Modifying [Original file (Fig2_ExtFig4_WT_RPM_Organoids_Allografts_Final.R)](Preprocessing_for_reference/R_Code/Fig2_ExtFig4_WT_RPM_Organoids_Allografts_Final.R) into an executable RMarkdown Notebook
 
 ### Related to:
 * Fig 1i-n
@@ -18,7 +18,6 @@ suppressPackageStartupMessages({
     library(scater)
     library(Seurat)
     library(ggpubr)
-    # library(zellkonverter)
 })
 ```
 
