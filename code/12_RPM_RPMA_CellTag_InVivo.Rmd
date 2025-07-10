@@ -1,0 +1,154 @@
+---
+title: "RPM RPMA CellTag In Vivo Notebook"
+output: html_notebook
+date: 2025-07-10
+author: "Abbie Ireland and Darren Tyson"
+---
+
+### Modified original file [ExtFig7_RPM_RPMA_CellTag_InVitrotoInVivo_Final.R](Preprocessing_for_reference/R_Code/ExtFig7_RPM_RPMA_CellTag_InVitrotoInVivo_Final.R)  
+
+### Related to
+* Extended Data Fig 7b,e,f
+
+
+```{r}
+suppressPackageStartupMessages({ 
+    library(tidyverse)
+    library(SingleCellExperiment)
+    library(ggplot2)
+    library(cowplot)
+    library(Seurat)
+    library(ggpubr)
+    library(ggnewscale)
+})
+```
+
+
+### Load data
+```{r}
+TBO_seurat_invitro <- readRDS("../data/05.15.25_RPM_RPMA_WT_Organoids_wCT_Clones.rds")
+clones <- readRDS("../data/05.18.25_RPM_RPMA_invitro_CTclones_all.rds")
+clones_subset <- readRDS("../data/05.18.25_RPM_RPMA_invitro_CTclones_matchinginvivo.rds")
+```
+#### Define colors for leiden clusters
+```{r}
+colors_leiden <- c('deepskyblue4', '#ff7f0e','#2ca02c', 'brown1', 'purple', '#A0522D', 
+                   'pink2',  '#a1c299',  '#4ba4d3', '#b5d7e4','#ef9171','#a6eb9a')
+
+pheno_cols <- c('#1B9E77', '#D95F02', '#7570B3', '#E7298A', '#66A61E', '#E6AB02', '#A6761D', '#666666')[1:5]
+names(pheno_cols) <- levels(clones_subset@meta.data$CellType)
+
+pattern_colors <- c("Pattern_1" = "orange", "Pattern_2" = "green", "Pattern_5"="purple","Pattern_4"="blue")
+
+```
+
+#### Extended Data Fig 7b
+```{r fig.height=3, fig.width=4}
+DimPlot(TBO_seurat_invitro, group.by='leiden_scVI_1.2', 
+        cols=colors_leiden, reduction='umap', label=TRUE,
+        label.size=8) & NoAxes()
+
+```
+
+```{r fig.height=3, fig.width=6}
+DimPlot(TBO_seurat_invitro, group.by='CellType_Sig_Based', cols="Dark2", reduction='umap', 
+        label=FALSE, label.size=6) & NoAxes() 
+```
+
+
+```{r}
+# Subset clones to just those with matching in vivo clones
+invivo_clones <- read.csv("../data/cloneswmatch.csv")
+clone_match <- invivo_clones$Clone
+Idents(clones)<-'CellTag_Clone'
+clones_subset <- subset(clones, idents=clone_match)
+table(clones_subset$CellTag_Pattern)
+```
+
+
+```{r}
+Idents(TBO_seurat_invitro) <- 'CellTag_Binary'
+
+```
+
+```{r}
+Idents(clones_subset) <- 'CellType_Sig_Based'
+
+x <- table(clones_subset@meta.data$CellTag_Clone,Idents(clones_subset))
+proportions <- as.data.frame(100*prop.table(x, margin = 1))
+
+colnames(proportions)<-c("Cluster", "Sample", "Frequency")
+proportions$Cluster<-factor(proportions$Cluster, clone_match)
+```
+
+#### Ext. Data Fig. 7e
+```{r message=FALSE, warning=FALSE}
+# Add pattern annotation 
+x <- invivo_clones$Pattern
+
+# Create annotation data
+annotation_df <- data.frame(
+  Sample = levels(proportions$Cluster),  # match x-axis labels
+  Group = x,  # Define annotation groups
+  y = -0.5  # Place below x-axis, adjust as needed
+)
+
+p <- ggplot(proportions, aes(fill=Sample, y=Frequency, x=Cluster)) + 
+    geom_bar(position="stack", stat="identity")
+
+p + scale_fill_manual(values=pheno_cols) +  
+    theme_bw() + theme(axis.text.y = element_text(size=20), 
+                       axis.text.x=element_text(size=14), axis.title.x =element_text(size=14), 
+                       axis.title.y = element_text(size=18), legend.text = element_text(size=12), 
+                       legend.title = element_text(size=18))+rotate_x_text(size=7,angle = 90) +
+    scale_fill_manual(values = pheno_cols, name="Basal cell state") +
+    theme_bw() +
+    theme(
+        axis.text.y = element_text(size = 20),
+        axis.text.x = element_text(size = 14),
+        axis.title.x = element_text(size = 14),
+        axis.title.y = element_text(size = 18),
+        legend.text = element_text(size = 12),
+        legend.title = element_text(size = 18)
+    ) +
+    rotate_x_text(size = 7, angle = 90) +
+  
+  # Reset fill scale so annotation can have its own
+    new_scale_fill() +
+  
+  # Add annotation bar
+    geom_tile(data = annotation_df,
+              aes(x = Sample, y = y, fill = Group),
+              height = 3,
+              inherit.aes = FALSE
+    ) +
+  scale_fill_manual(name = "In vivo clonal pattern", values = pattern_colors,
+                    guide = guide_legend(override.aes = list(size = 5)))
+```
+
+#### Extended Data Fig 7f
+Output from these plots were manually overlaid onto full UMAP with all cells in grey using Adobe Illustrator
+```{r}
+#Plot RPM patterns 1, 2, and 5 that have matching in vivo clones
+Idents(clones_subset) <- 'CellTag_Pattern'
+
+plotCloneDyn <- function(pat) {
+    ss <- subset(clones_subset, idents=pat)
+    DimPlot(ss, group.by="CellType_Sig_Based", reduction='umap', order=TRUE, 
+            cols=pheno_cols, pt.size=6, shuffle=TRUE) + ggtitle(pat) & 
+        NoAxes() & 
+        theme(legend.background = element_rect(fill = "transparent"),
+              legend.box.background = element_rect(fill = "transparent"),
+              panel.background = element_rect(fill = "transparent"),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              plot.background = element_rect(fill = "transparent", color = NA))
+    
+}
+```
+
+```{r}
+lapply(c("Pattern_1","Pattern_2","Pattern_5"), plotCloneDyn)
+
+```
+

@@ -20,6 +20,9 @@ data/05_2025_RPM_Orgs_Allo_Fig2d.rds
 data/05_2025_RPM_Orgs_Only_ExtFig4a-c.rds
 data/05_2025_RPMK5vCGRP_Norm_Allsigs_New.rds
 data/05_2025_RPMvRPR2_Allografts_Final.rds
+data/05.15.25_RPM_RPMA_WT_Organoids_wCT_Clones.rds
+data/05.18.25_RPM_RPMA_invitro_CTclones_all.rds
+data/05.18.25_RPM_RPMA_invitro_CTclones_matchinginvivo.rds
 data/050125_RPM_RPMA_TBOAllo_CellTagAnalysis_New_1.2_fate_FAprojection_DPT_final.h5ad
 data/050125_RPM_WT_CTpostCre_CTpreCre_TBOs_adata2.h5ad
 data/050325_RPM_Orgs_Allos_Updated_adata3.h5ad
