@@ -1,7 +1,7 @@
 # RPM K5 Cre vs CGRP Cre Primary Tumor Analysis
 # Ireland et al, 2025
-# Related to Extended Data Fig. 2g-n
-# Original file "Fig1_ExtFig2_RPMK5vsCGRP_Primary_Final.R" 
+# Related to *Old Fig. 1 h-k and Extended Data Fig. 2e-i*
+# Related to *Final Extended Data Fig. 2g-n*
 
 setwd("/Users/abbieireland/Desktop/scRNAseq")
 # If using Isilon share
