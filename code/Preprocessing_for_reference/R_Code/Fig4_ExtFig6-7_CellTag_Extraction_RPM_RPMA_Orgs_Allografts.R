@@ -1,7 +1,8 @@
 # CellTag and Clone Calling for RPM (CellTagged pre-Cre and CellTagged post-Cre) and RPMA basal-organoid-derived allograft tumours
 # To generate CellTag metadata/annotations
 # Ireland et al, 2025
-# Related to Fig. Fig. 4c-j, and Extended Data Fig. 6b-c
+# Related to *Old Fig. 4c-j, and Extended Data Fig. 6b-c*
+# Related to *Final Fig. 3c-j and Extended Data Fig. 6b-c*
 
 ### Load packages##
 
