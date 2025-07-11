@@ -36,6 +36,8 @@ data/RPMK5vCGRP_Norm_Allsigs_obs.csv
 data/RPMK5vCGRP_Norm_Allsigs.h5Seurat
 data/RPM_TBO_allografts_complete.h5ad
 
+# error log
+download_errors.log
 
 # figures output by code
 */figures

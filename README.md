@@ -26,15 +26,24 @@ Neuroendocrine and tuft cells are rare, chemosensory epithelial lineages defined
 Manuscript pre-print is available online [here](https://www.biorxiv.org/content/10.1101/2024.11.13.623500v1).
 
 ## Data
-Data are accessible on GEO, under Superseries [GSE279200](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE279200).  
-Raw data are provided as FASTQ and processed CellRanger count filtered barcodes, features, and matrices. 
-  
+* Data are accessible on GEO, under Superseries [GSE279200](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE279200).  
+* Raw data are provided as FASTQ and processed CellRanger count filtered barcodes, features, and matrices.  
+* Processed scRNA-seq data have been uploaded to [Zenodo in record 15857303](https://zenodo.org/records/15857303)  
+
+#### NOTE
+Data to reproduce the figures can be downloaded automatically using [code/00_download_data.ipynb](code/00_download_data.ipynb)  
+
 ## Code
 Code to replicate analyses performed in [Ireland et al. *Nature* 2025]
 
-1. Download raw or processed data from NCBI GEO [here](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE279200).
-2. See Jupyter Notebooks and R scripts above for manuscript specific dataset integration methods and analyses. All samples were first subject to Scanpy/scVI-based QC and clustering in Python, and processed anndata objects were saved. R scripts call in the resulting anndata objects and convert them to Seurat objects for additional analyses. Many files called in R scripts are included in the metadata_files folder.
-3. Please refer to [Scanpy](https://scanpy.readthedocs.io/en/stable/), [scvi-tools](https://docs.scvi-tools.org/en/stable/tutorials/index.html), [Single-cell best practices](https://www.sc-best-practices.org/), [CellTagR](https://github.com/morris-lab/CellTagR) and [CellRank](https://cellrank.readthedocs.io/en/stable/notebooks/tutorials/general/100_getting_started.html) tutorials for system requirements and package-specific code that was adapted for datasets in this manuscript. 
+1. Code to reproduce the figures are provided in [code](code/) and preprocessing code is provided in [code/Preprocessing_for_reference]([code/Preprocessing_for_reference)  
+1. Preprocessed data needed to reproduce the figures can automatically be downloaded using [code/00_download_data.ipynb](code/00_download_data.ipynb)  
+1. Raw or processed data is also available from NCBI GEO [here](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE279200).
+1. See Jupyter Notebooks and R notebooks in [code](code) for manuscript specific dataset integration (preprocessing) methods and analyses. 
+	* All samples were first subject to Scanpy/scVI-based QC and clustering in Python, and processed anndata objects were saved. 
+	* R scripts call in the resulting anndata objects and convert them to Seurat objects for additional analyses. 
+	* Many files called in R scripts are included in the [code/Preprocessing_for_reference/R_Code/metadata_files](code/Preprocessing_for_reference/R_Code/metadata_files).  
+1. Please refer to [Scanpy](https://scanpy.readthedocs.io/en/stable/), [scvi-tools](https://docs.scvi-tools.org/en/stable/tutorials/index.html), [Single-cell best practices](https://www.sc-best-practices.org/), [CellTagR](https://github.com/morris-lab/CellTagR) and [CellRank](https://cellrank.readthedocs.io/en/stable/notebooks/tutorials/general/100_getting_started.html) tutorials for system requirements and package-specific code that was adapted for datasets in this manuscript. 
 
 #### Note 
 To install necessary packages for executing Python code we recommend using the `scrnaseq312` conda environment that can be set up using the following (assuming you are in the top directory of this repository):
