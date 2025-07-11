@@ -1,7 +1,7 @@
 # RPM vs RPR2 basal-organoid-derived allograft tumour analysis 
 # Ireland et al, 2025
-# Related to Fig. 2l-o and Extended Data Fig. 4h-j
-
+# Related to *Old Fig. 2l-o and Extended Data Fig. 4h-j*
+# Related to *Final Ext. Data Fig. 4i-n*
 # Load necessary packages
 suppressPackageStartupMessages({ 
   library(tidyverse)
@@ -67,7 +67,7 @@ dim(test)
 RPMvRPR2[['umap']] <- CreateDimReducObject(test, key="UMAP_", assay = "RNA")
 RPMvRPR2[['umap']]@cell.embeddings
 
-# Define sample color vector and use to plot UMAP in Fig. 2l #
+# Define sample color vector and use to plot UMAP in Ext. Data Fig. 4i #
 unid_cols<-c("turquoise3","maroon")
 DimPlot(RPMvRPR2,group.by='Genotype',cols=unid_cols,reduction='umap',shuffle=TRUE,label=FALSE)+NoAxes()
 
@@ -77,7 +77,7 @@ DimPlot(RPMvRPR2,group.by='leiden_scVI_1.2',cols=colors, reduction='umap',label=
 
 
 
-## Look at where RPM phenotypes are in this space for Fig. 2o ##
+## Look at where RPM phenotypes are in this space for Ext. Data Fig. 4l ##
 # If on Isilon share
 #RPM_Allo<readRDS("All_Staff/Abbie/Basal_Lung_Manuscript/scRNAseq/Final_R/Fig2_ExtFig4_RPM_Organoids_Allo/05_2025_RPM_AllograftOnly_Fig2e.rds")
 
@@ -110,7 +110,7 @@ pheno_col<-c("brown2","darkorchid4","dodgerblue","#66A61E","orange","turquoise4"
 
 RPMvRPR2@meta.data$RPM_Pheno<-factor(RPMvRPR2@meta.data$RPM_Pheno, c("NE","NE_Neuronal","Neuronal","Atoh1","Tuft","Basal","RPR2","Undetermined"))
 
-# Fig. 2o UMAP #
+# Ext. Data Fig. 4l UMAP #
 DimPlot(RPMvRPR2,group.by='RPM_Pheno',cols=pheno_col,reduction='umap',shuffle=TRUE)+NoAxes()+ggtitle("RPM Cell State from Fig 2f")
 
 
@@ -118,7 +118,7 @@ DimPlot(RPMvRPR2,group.by='RPM_Pheno',cols=pheno_col,reduction='umap',shuffle=TR
 DefaultAssay(RPMvRPR2)<-'RNA'
 RPMvRPR2<-NormalizeData(RPMvRPR2)
 
-# Ext. Data Fig. 4h #
+# Ext. Data Fig. 4i #
 ## Example code to generate violin plots comparing RPM to RPR2 allos for Ext Data Fig. 4h + Wilcoxon rank-sum test ##
 # Repeat for each gene of interest, adjusting y.max to visualize range and p-value per gene #
 a<-VlnPlot(RPMvRPR2,features = c("Mycl"), group.by=c("Genotype"),same.y.lims=FALSE,cols=c("turquoise3","maroon"),
@@ -150,7 +150,7 @@ a +stat_summary(fun = mean,
 mouse94<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/mouse94.csv")
 
 ######################################################
-## Look at SCLC-archetype signatures as scores (Ext Data Fig 4i)
+## Look at SCLC-archetype signatures as scores (Ext Data Fig 4m)
 
 arch<-read.csv("Signatures/Archetype_Sigs_Maddox.csv")
 a<-arch$SCLC.A
@@ -215,7 +215,7 @@ RPMvRPR2<-AddModuleScore(
 VlnPlot(RPMvRPR2, features = c("A_Archetype1","A2_Archetype1","N_Archetype1","P_Archetype1"),group.by=c("Genotype"), cols=c("turquoise3","maroon"),alpha=0.05,ncol=4)
 
 #################################################################
-## Look at A, N, P ChIP targets as scores (Ext Data Fig. 4j)
+## Look at A, N, P ChIP targets as scores (Ext Data Fig. 4n)
 chip<-read.csv("Signatures/ASCL1_NEUROD1_POU2F3_ATOH_ChIP_Targets.csv")
 achip<-chip$Borromeo_ASCL1_Targets
 nchip<-chip$Borromeo_Oliver_NEUROD1_Targets
@@ -249,11 +249,11 @@ RPMvRPR2<-AddModuleScore(
   features = list(MYC_targets),
   name = 'MYC_Targets')
 
-## Ext Data Fig 4j ##
+## Ext Data Fig 4n ##
 VlnPlot(RPMvRPR2, features = c("ASCL1_Targets1","NEUROD1_Targets1","POU2F3_Targets1","MYC_Targets1"),group.by=c("Genotype"), cols=c("turquoise3","maroon"),alpha=.06, ncol=4)
 
 
-# Example code to visualize mean and also determine p-val by Wilcoxon rank sum for Ext. Fig. 4i-j #
+# Example code to visualize mean and also determine p-val by Wilcoxon rank sum for Ext. Fig 4m-n #
 # Repeat for each signature, adjusting y.max accordingly
 
 a<-VlnPlot(RPMvRPR2,features = c("A_Archetype1"), group.by=c("Genotype"),same.y.lims=FALSE,cols=c("turquoise3","maroon"),
@@ -270,7 +270,7 @@ a + stat_summary(fun = mean,
 
 
 
-######## Next, add NE Score for Fig. 2n ##########
+######## Next, add NE Score for Ext. Data Fig. 4k ##########
 
 #### Convert to SCE to add NE Score ###
 # Convert seurat object to SCE
@@ -313,11 +313,11 @@ ne_score<-sce$NE_spearman
 RPMvRPR2@meta.data$NE_spearman<-ne_score
 RPMvRPR2@meta.data$NE_spearman
 
-### UMAP for Fig. 2n ###
+### UMAP for Ext. Data Fig. 4k ###
 FeaturePlot(RPMvRPR2, features = c("NE_spearman"), pt.size=0.2, reduction='umap',order=TRUE)+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 
-### Violin Plot for Fig. 2n ###
-# Assign pheno/cell states as in Fig. 4c
+### Violin Plot for Ext. Data Fig. 4k ###
+# Assign pheno/cell states 
 RPMvRPR2@meta.data$Geno_C8<- ifelse(RPMvRPR2@meta.data$leiden_scVI_1.2 %in% "8", "Cluster_8",
                                     ifelse(RPMvRPR2@meta.data$Genotype %in% "RPM", "RPM",
                                     ifelse(RPMvRPR2@meta.data$Genotype %in% "RPR2", "RPR2","NA")))
@@ -328,7 +328,7 @@ table(RPMvRPR2@meta.data$Geno_C8)
 # RPM      RPR2 Cluster_8 
 # 10286      8791       287 
 
-# Fig. 2n Violin plot final# 
+# Ext. Data Fig. 4k Violin plot final# 
 x<-VlnPlot(RPMvRPR2,features = c("NE_spearman"), same.y.lims=FALSE,group.by=c("Geno_C8"),cols=c("turquoise3","maroon","#A0522D"),alpha=.2, ncol=1)
 x
 fortest<-x+ geom_boxplot(fill=c("turquoise3","maroon","#A0522D"),alpha=1, position = position_dodge(width = .2),size=0.5,color="black", notch=TRUE, notchwidth=0.3, outlier.shape = 2, outlier.colour=NA)+ggtitle("NE score")
