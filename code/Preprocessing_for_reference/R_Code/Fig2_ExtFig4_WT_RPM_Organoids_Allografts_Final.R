@@ -1,6 +1,7 @@
 # WT Organoids versus RPM Basal Organoids and RPM Basal Allografts
 # Ireland et al, 2025
-# Related to Fig. 2d-i and Extended Data Fig. 4a-f
+# Related to *Old Fig. 2d-i and Extended Data Fig. 4a-f*
+# Related to *Final Fig. 1i-n and Extended Data Fig. 4a-f*
 
 # Load necessary packages
 library(Seurat)
@@ -168,7 +169,7 @@ saveRDS(RPM_Orgs,"05_2025_RPM_Orgs_Only_ExtFig4a-c.rds")
 
 
 ################################################################################################################################################################
-## Next, cluster WT and transformed RPM basal organoids with resulting RPM allograft tumors (Allo1, Allo3) for Fig. 2d and Ext. Data. Fig. 4d ###
+## Next, cluster WT and transformed RPM basal organoids with resulting RPM allograft tumors (Allo1, Allo3) for Fig. 1i and Ext. Data. Fig. 4d ###
 ## Anndata object previously generated in Scanpy, https://github.com/TGOliver-lab/Ireland_Basal_SCLC_2025/blob/main/Python_Code/Fig2d_ExtFig4a-d_WT_RPM_Organoids_Allograft_Final_Clean.ipynb
 ################################################################################################################################################################
 
@@ -227,7 +228,7 @@ dim(test)
 RPM_Orgs_Allo[['umap']] <- CreateDimReducObject(test, key="UMAP_", assay = "RNA")
 RPM_Orgs_Allo[['umap']]@cell.embeddings
 
-# Define color scheme and generate UMAP in Fig. 2d #
+# Define color scheme and generate UMAP in Fig. 1i #
 RPM_Orgs_Allo@meta.data$Sample<-factor(RPM_Orgs_Allo@meta.data$Batch,c("Org_No_Cre","Org_CTpreCre","Org_CTpostCre","RPM_Allo_Original","RPM_Allo_3_New"))
 table(RPM_Orgs_Allo@meta.data$Sample)
 # Org_No_Cre      Org_CTpreCre     Org_CTpostCre RPM_Allo_Original    RPM_Allo_3_New 
@@ -237,7 +238,7 @@ sample_cols<-c("orange","#D8BFD8","darkorchid4", # deep teal
                "turquoise", "#1B9E77" # dark orange
                )
 
-# UMAP in Fig. 2d #
+# UMAP in Fig. 1i #
 DimPlot(RPM_Orgs_Allo,group.by='Sample',cols=sample_cols, reduction='umap',label=FALSE,label.size=6, shuffle=TRUE, pt.size=0.01)&NoAxes()
 
 
@@ -305,7 +306,7 @@ p<-ggplot(proportions, aes(fill=Sample, y=Frequency, x=Cluster)) +
 
 p + scale_fill_manual(values=c("indianred3","green3","royalblue4"))+ theme_bw()+ theme(axis.text.y = element_text(size=20), axis.text.x=element_text(size=20,angle=45, hjust = 1), axis.title.x =element_text(size=20), axis.title.y = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=20))
 
-# Add basal and normal NE cell signature for Fig. 2d #
+# Add basal and normal NE cell signature for Fig. 1i #
 
 ######## Cell Type signatures ###########
 ct<-read.csv("Signatures/Montoro_Consensus.csv")
@@ -336,7 +337,7 @@ saveRDS(RPM_Orgs_Allo,"05_2025_RPM_Orgs_Allo_Fig2d.rds")
 
 
 ####################################################################################################
-########### Last, analyze RPM allograft tumour cells only for Fig. 2e #######################
+########### Last, analyze RPM allograft tumour cells only for Fig. 1j #######################
 ## FEWER CELLS BC DOWNSAMPLED TO KEEP HETEROGENEITY/representation of rare clusters like the P cluster #######
 ## Anndata object originally generated in scanpy/scVI here: https://github.com/TGOliver-lab/Ireland_Basal_SCLC_2025/blob/main/Python_Code/Fig2e_ExtFig4e_RPM_Allos_Final_Clean.ipynb
 ####################################################################################################
@@ -394,7 +395,7 @@ RPM_Allo[['umap']] <- CreateDimReducObject(test, key="UMAP_", assay = "RNA")
 RPM_Allo[['umap']]@cell.embeddings
 
 
-# Define color scheme and plot UMAP as in Fig. 2e #
+# Define color scheme and plot UMAP as in Fig. 1j #
 my_colors <- c(
   "#E41A1C", # strong red
   "#377EB8", # medium blue
@@ -419,7 +420,7 @@ my_colors <- c(
   "turquoise"  # olive green (NOT same green as before)
 )
 
-# Fig. 2e UMAP #
+# Fig. 1j UMAP #
 DimPlot(RPM_Allo,group.by='leiden_scVI_1.3',cols=my_colors, reduction='umap',label=TRUE,label.size=7)&NoAxes()
 
 # Can visualize UMAP by individual sample
@@ -442,7 +443,7 @@ DimPlot(RPM_Allo,group.by='Sample',cols=c("lavender","darkorchid4"), reduction='
 DefaultAssay(RPM_Allo)<-'RNA'
 RPM_Allo<-NormalizeData(RPM_Allo)
 
-####### Visualize A, N, P, Atoh1, Y, and P63 for Fig. 2e ##############
+####### Visualize A, N, P, Atoh1, Y, and P63 for Fig. 1j ##############
 
 VlnPlot(
   RPM_Allo,
@@ -479,7 +480,7 @@ kruskal_result <- kruskal.test(expression ~ group, data = expr_values)
 print(kruskal_result)
 
 ########################################################################
-# Assign states for Fig. 2f
+# Assign states for Fig. 1k
 ########################################################################
 # Tuft- 20
 # NE- 1, 2, 3, 5, 9, 11, 14, 16, 17, 18, 
@@ -505,13 +506,13 @@ table(RPM_Allo@meta.data$Pheno)
 RPM_Allo@meta.data$Pheno<-factor(RPM_Allo@meta.data$Pheno, levels=c("NE","NE_Neuronal","Neuronal","Atoh1","Tuft","Basal"))
 pheno_col<-c("brown2","darkorchid4","dodgerblue","#66A61E","orange","turquoise4")
 
-## UMAP by Fate in Fig. 2f #
+## UMAP by Fate in Fig. 1k #
 DimPlot(RPM_Allo, group.by=c("Pheno"), cols=pheno_col, shuffle=TRUE, pt.size=0.6)+NoAxes()
 
 
 ######### Add Gene Signature Data ##################
 
-## Look at ND1 vs ASCL1 vs POU2F3 vs ATOH1 ChIP targets as scores (Fig. 2i)
+## Look at ND1 vs ASCL1 vs POU2F3 vs ATOH1 ChIP targets as scores (Fig. 1n)
 
 chip<-read.csv("Signatures/ASCL1_NEUROD1_POU2F3_ATOH_ChIP_Targets.csv")
 achip<-chip$Borromeo_ASCL1_Targets
@@ -549,7 +550,7 @@ RPM_Allo<-AddModuleScore(
   name = 'ATOH1_Targets')
 
 
-## Assign YAP1 activity score in lieu of YAP1 target genes ## (Fig. 2i)
+## Assign YAP1 activity score in lieu of YAP1 target genes ## (Fig. 1n)
 
 yap<-read.csv("Signatures/Yap-Taz_signatures.csv")
 yap
@@ -565,7 +566,7 @@ RPM_Allo<-AddModuleScore(
 
 
 
-######## Normal Cell Type signatures (Fig 2h) ###########
+######## Normal Cell Type signatures (Fig 1m) ###########
 ct<-read.csv("Signatures/Montoro_Consensus.csv")
 basal_noC<-ct$Basal_noC[1:41]
 basal_noC
@@ -671,7 +672,7 @@ VlnPlot(
   )
 
 
-## Convert Seurat object to SCE to generate NE score for Fig. 2g #
+## Convert Seurat object to SCE to generate NE score for Fig. 1l #
 
 # Convert seurat object to SCE
 library(SingleCellExperiment)
@@ -706,19 +707,19 @@ sce$NE_spearman <- apply(X = X, 2, ne_score,
                          method = "spearman")
 
 
-# Add NE score to seurat object for Fig. 2g # 
+# Add NE score to seurat object for Fig. 1l # 
 ne_score<-sce$NE_spearman
 RPM_Allo@meta.data$NE_spearman<-ne_score
 RPM_Allo@meta.data$NE_spearman
 
 
-# Fig 2g plots #
+# Fig 1l plots #
 FeaturePlot(RPM_Allo, features = c("NE_spearman"), pt.size=0.2, reduction='umap',order=TRUE)+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 VlnPlot(RPM_Allo,features = c("NE_spearman"), same.y.lims=FALSE,group.by=c("Pheno"),cols=pheno_col,pt.size=.01)
 
 
 ###################### Violin plotting signature scores using Scater #####################
-###### For plots in Fig. 2g-i
+###### For plots in Fig. 1l-n
 # For example, NE score by phenotype #
 library(scater)
 
@@ -747,7 +748,7 @@ print(kruskal_result)
 
 # If significant, do Dunn's test
 if (kruskal_result$p.value < 0.05) {
-  dunn_result <- dunnTest(expression ~ group, data = expr_values)
+  dunn_result <- dunnTest(expression ~ group, data = expr_values,method="bonferroni")
   print(dunn_result)
 }
 
