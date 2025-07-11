@@ -1,6 +1,7 @@
 # RPM (CellTagged pre-Cre and CellTagged post-Cre) and RPM basal-organoid-derived allograft tumour analysis & CellTag analyses
 # Ireland et al, 2025
-# Related to Fig. 3e-l, Fig. 4c-f,h, Fig. 6d,e,g,h
+# Related to *Old Fig. 3e-l, Fig. 4c-f,h, Fig. 6d,e,g,h*
+# Related to *New Fig. 2e-l, Fig. 3c-f,h, and Fig. 5d-h#
 # Also related to Extended Data Fig. 5e,f, Extended Data Fig. 6a-e, and Extended Data Fig. 10e
 
 
@@ -105,8 +106,8 @@ TBO_seurat[['umap']] <- CreateDimReducObject(test, key="UMAP_", assay = "RNA")
 TBO_seurat[['umap']]@cell.embeddings
 
 
-# Define color vector to plot UMAP by leiden cluster for Fig. 3f #
-# Fig. 3f #
+# Define color vector to plot UMAP by leiden cluster for Fig. 2f #
+# Fig. 2f #
 
 my_colors <- c(
   "#E41A1C", # strong red
@@ -132,17 +133,17 @@ my_colors <- c(
   "#66A61E"  # olive green (NOT same green as before)
 )
 
-# Fig. 3e UMAP #
+# Fig. 2e UMAP #
 DimPlot(TBO_seurat,group.by='Genotype',cols=c("darkorchid4","orange"), reduction='umap',label=FALSE,label.size=7)&NoAxes()
 
 # Plot by individual samples if desired
 DimPlot(TBO_seurat,group.by='UnID',cols=my_colors, reduction='umap',shuffle=TRUE,label=FALSE,label.size=6) & NoAxes()
 
-# Fig. 3f UMAP by Leiden #
+# Fig. 2f UMAP by Leiden #
 DimPlot(TBO_seurat,group.by='leiden_scVI_1.2',cols=my_colors, reduction='umap',label=TRUE,label.size=7)&NoAxes()
 
 
-### Look at distribution leiden clusters per sample for Fig. 3f barplot ##
+### Look at distribution leiden clusters per sample for Fig. 2f barplot ##
 Idents(TBO_seurat)<-'leiden_scVI_1.2'
 
 x<-table(TBO_seurat@meta.data$Genotype,Idents(TBO_seurat))
@@ -159,7 +160,7 @@ p<-ggplot(proportions, aes(fill=Sample, y=Frequency, x=Cluster)) +
 p + scale_fill_manual(values=my_colors)+ theme_bw()+ theme(axis.text.y = element_text(size=20), axis.text.x=element_text(size=20), axis.title.x =element_text(size=20), axis.title.y = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=20))
 
 
-# Assign phenotype for all tumors cells for Fig. 3h (based on gene expression and signature expression patterns generated below) #
+# Assign phenotype for all tumors cells for Fig. 2h (based on gene expression and signature expression patterns generated below) #
 #Basal- 17
 #NE/A- 1, 7, 11, 14, 18, 19, 20
 #N/NE- 0, 8
@@ -182,11 +183,11 @@ TBO_seurat@meta.data$Pheno<- ifelse(TBO_seurat@meta.data$leiden_scVI_1.2 %in% c(
 table(TBO_seurat@meta.data$Pheno)
 TBO_seurat@meta.data$Pheno<-factor(TBO_seurat@meta.data$Pheno, levels=c("NE","NE/Neuronal","Neuronal","ATOH1","Tuft","Triple-Neg","Basal"))
 
-# Define fate color vector and use to plot by cell state for Fig. 3h #
+# Define fate color vector and use to plot by cell state for Fig. 2h #
 pheno_col<-c("brown2","darkorchid4","dodgerblue","#66A61E","orange","turquoise4","turquoise")
 DimPlot(TBO_seurat,group.by='Pheno',cols=pheno_col, reduction='umap',label=FALSE,label.size=6) & NoAxes()
 
-##### What % of cells occupy what cell fate per genotype? For Fig. 3h barplot. ###
+##### What % of cells occupy what cell fate per genotype? For Fig. 2h barplot. ###
 Idents(TBO_seurat)<-'Pheno'
 
 x<-table(TBO_seurat@meta.data$Genotype,Idents(TBO_seurat))
@@ -309,13 +310,13 @@ patchwork::wrap_plots(plots, ncol = 3)
 
 
 ########################################################################
-######### Add Signature Data for Fig. 3,6 and Ext. Data Fig. 10 ##################
+######### Add Signature Data for Fig. 2,5 and Ext. Data Fig. 10 ##################
 ########################################################################
 library(viridis)
 library(ggplot2)
 library(ggpubr)
 
-## Look at A, N, P, ATOH1 ChIP targets and YAP activity as scores (Fig. 3j) ##
+## Look at A, N, P, ATOH1 ChIP targets and YAP activity as scores (Fig. 2j) ##
 chip<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/ASCL1_NEUROD1_POU2F3_ATOH_ChIP_Targets.csv")
 achip<-chip$Borromeo_ASCL1_Targets
 nchip<-chip$Borromeo_Oliver_NEUROD1_Targets
@@ -366,7 +367,7 @@ TBO_seurat<-AddModuleScore(
   name = 'YAP_Activity')
 
 
-# UMAPs in Fig. 3j #
+# UMAPs in Fig. 2j #
 FeaturePlot(TBO_seurat, features = c("ASCL1_Targets1"), pt.size=0.2, reduction='umap')+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 FeaturePlot(TBO_seurat, features = c("NEUROD1_Targets1"), pt.size=0.2, reduction='umap')+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 FeaturePlot(TBO_seurat, features = c("ATOH1_Targets1"), pt.size=0.2, reduction='umap')+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
@@ -374,7 +375,7 @@ FeaturePlot(TBO_seurat, features = c("POU2F3_Targets1"), pt.size=0.2, reduction=
 FeaturePlot(TBO_seurat, features = c("YAP_Activity1"), pt.size=0.2, reduction='umap')+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 
 
-##### Now add VlnPlots by genotype with wilcoxon rank sum tests for Fig. 3j ###
+##### Now add VlnPlots by genotype with wilcoxon rank sum tests for Fig. 2j ###
 ## Example code for ATOH1 Targets, replace with target gene signature of interest and repeat ##
 a <- VlnPlot(
   TBO_seurat,
@@ -403,7 +404,7 @@ a + stat_summary(fun = mean,
 
 
 
-######## Normal cell Type signatures for Fig. 3k and Ext. Data. Fig. 10e ###########
+######## Normal cell Type signatures for Fig. 2k and Ext. Data. Fig. 10e ###########
 ct<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/Montoro_Consensus.csv")
 basal_noC<-ct$Basal_noC[1:41]
 basal_noC
@@ -448,7 +449,7 @@ TBO_seurat<-AddModuleScore(
   name = 'Iono_Mouse_Ext')
 
 
-# UMAPs for Fig. 3k #
+# UMAPs for Fig. 2k #
 FeaturePlot(TBO_seurat, features = c("NE_Consensus1"), pt.size=0.2, reduction='umap')+ scale_color_gradientn(colors=rocket(10, direction=-1)) & NoAxes()+
   theme(
     legend.position = "none",    # remove legend
@@ -480,7 +481,7 @@ FeaturePlot(TBO_seurat, features = c("Iono_Human1"), pt.size=0.2, reduction='uma
   )
 
 #########################################################
-## Look at SCLC Archetype signatures for Fig. 3l ##
+## Look at SCLC Archetype signatures for Fig. 2l ##
 arch<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/Archetype_Sigs_Maddox.csv")
 a<-arch$SCLC.A
 a2<-arch$SCLC.A2
@@ -541,7 +542,7 @@ TBO_seurat<-AddModuleScore(
   name = 'Y_Archetype')
 
 
-######## Add NE Score (Fig. 3i) ##########
+######## Add NE Score (Fig. 2i) ##########
 
 #### Converting to SCE to Add NE Score and create Violin plots ###
 
@@ -582,7 +583,7 @@ sce$NE_spearman <- apply(X = X, 2, ne_score,
 ###################### Violin plotting signatures of interest #####################
 library(scater)
 
-# Plot NE spearman, for example, by cell fate (as in Fig. 3i) #
+# Plot NE spearman, for example, by cell fate (as in Fig. 2i) #
 # Adjust ylim per signature to capture range # 
 
 x<-scater::plotColData(sce, x = "Pheno", y = "NE_spearman", colour_by = "Pheno")+scale_discrete_manual(aesthetics = c("colour", "fill"),values=pheno_col)
@@ -630,19 +631,19 @@ stat.test <- data.frame(
 
 print(stat.test)
 
-# Repeat the above for any signatures of interest including for normal cell type signatures (Fig. 3k, Ext. Data. Fig. 10e) and SCLC-archetype signatures (Fig. 3l)
+# Repeat the above for any signatures of interest including for normal cell type signatures (Fig. 2k, Ext. Data. Fig. 10e) and SCLC-archetype signatures (Fig. 2l)
 # Manually add p-values to plot using Illustrator
 
 
 
-# Plot NE score by genotype for Fig. 3i
+# Plot NE score by genotype for Fig. 2i
 x<-scater::plotColData(sce, x = "Genotype", y = "NE_spearman", colour_by = "Genotype")+scale_discrete_manual(aesthetics = c("colour", "fill"),values=c("darkorchid4","orange"))
 x<-x+ theme(axis.title.y = element_text(size = 24),axis.text.y = element_text(size = 16), axis.text.x = element_blank(), plot.title = element_blank(),
             legend.position = "none") + labs(x = "",  y = "Signature score")+  ylim(-1,1)+ geom_boxplot(fill=c("darkorchid4","orange"), alpha=1/5, position = position_dodge(width = .2),size=0.2,color="black", notch=TRUE, notchwidth=0.3, outlier.shape = 2, outlier.colour=NA)
 
 x
 
-## Perform wilcoxon rank-sum test for RPM vs RPMA on the NE score data (Fig. 3i) ##
+## Perform wilcoxon rank-sum test for RPM vs RPMA on the NE score data (Fig. 2i) ##
 x + stat_summary(fun = mean,
                  geom = "point",
                  shape = 18,
@@ -653,10 +654,10 @@ x + stat_summary(fun = mean,
 # Manually add p-value using Illustrator #
 
 
-## Move back to Seurat object to add NE_spearman score (Fig. 3i) ##
+## Move back to Seurat object to add NE_spearman score (Fig. 2i) ##
 TBO_seurat@meta.data$NE_spearman<-sce$NE_spearman
 
-## Fig. 3i UMAP ##
+## Fig. 2i UMAP ##
 FeaturePlot(TBO_seurat, features = c("NE_spearman"), pt.size=0.2, reduction='umap')+ scale_color_gradientn(colors=rocket(10, direction=-1)) & NoAxes()+
   theme(
     legend.position = "none",    # remove legend
@@ -664,7 +665,7 @@ FeaturePlot(TBO_seurat, features = c("NE_spearman"), pt.size=0.2, reduction='uma
   )
 
 
-# Save Seurat object as is before moving into adding human signatures for Fig. 6 #
+# Save Seurat object as is before moving into adding human signatures for Fig. 5 #
 saveRDS(TBO_seurat,"05_2025_RPM_RPMA_Allos_Seurat.rds")
 
 # To read in later #
@@ -673,10 +674,10 @@ TBO_seurat<-readRDS("05_2025_RPM_RPMA_Allos_Seurat.rds")
 
 
 ####################################################################################
-# Add human signatures for Fig. 6 #
+# Add human signatures for Fig. 5 #
 ####################################################################################
 
-########## Adding  CARIS signatures (for Fig. 6d) ############
+########## Adding  CARIS signatures (for Fig. 5d) ############
 
 caris<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/Caris_Top100_HumanSCLC.csv")
 mouse94<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/mouse94.csv")
@@ -731,12 +732,12 @@ TBO_seurat<-AddModuleScore(
   features = list(tn),
   name = 'Caris_TN-')
 
-# Use FeaturePlot to plot UMAPs of each human Caris signature (for Fig. 6d)
+# Use FeaturePlot to plot UMAPs of each human Caris signature (for Fig. 5d)
 # TN- is Lin-
 FeaturePlot(TBO_seurat, features = c("Caris_TN-1"), pt.size=0.2, reduction='umap',order=TRUE)+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 
 
-# Apply NMF-3 signature (SCLC-inflammatory) from Liu et al to our data (Fig 6g) #
+# Apply NMF-3 signature (SCLC-inflammatory) from Liu et al to our data (Fig 5g) #
 liu<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/Liu_NMF_Sigs.csv")
 nmf3<-liu$NMF3
 
@@ -749,16 +750,26 @@ TBO_seurat<-AddModuleScore(
   features = list(nmf3_m),
   name = 'NMF3-I')
 
-# Use FeaturePlot to plot UMAP of Liu NMF3 signature (for Fig. 6g)
+# Use FeaturePlot to plot UMAP of Liu NMF3 signature (for Fig. 5g)
 FeaturePlot(TBO_seurat, features = c("NMF3-I1"), pt.size=0.2, reduction='umap',order=TRUE)+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 
-####### Add Antigen presentation signature (used in Gay et al) (Fig 6g) #######
+####### Add Antigen presentation signature (used in Gay et al) (Fig 5g) #######
 inf<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/Human_inflamed_Gay.csv")
 mhc<-inf$MHC
+t_cell<-inf$T_Cell_Inflamed
 
 mhc<-subset(mouse94, mouse94$human_homolog %in% mhc)
 mhc_m<-mhc$gene_name
 mhc_m
+
+t_cell<-subset(mouse94, mouse94$human_homolog %in% t_cell)
+t_cellm<-t_cell$gene_name
+t_cellm
+
+TBO_seurat<-AddModuleScore(
+  object = TBO_seurat,
+  features = list(t_cellm),
+  name = 'T_Cell_Inflamed_Gay')
 
 
 TBO_seurat<-AddModuleScore(
@@ -767,10 +778,10 @@ TBO_seurat<-AddModuleScore(
   name = 'MHC_Sig_Gay')
 
 
-# Fig 6g feature plot (MHC_Sig_Gay1="Antigen presentation") #
+# Fig 5g feature plot (MHC_Sig_Gay1="Antigen presentation") #
 FeaturePlot(TBO_seurat, features = c("MHC_Sig_Gay1"), pt.size=0.2, reduction='umap',order=TRUE)+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 
-### Gay et al SCLC-I signature for Fig. 6g ###
+### Gay et al SCLC-I signature for Fig. 5g ###
 inf<-read.csv("/Users/abbieireland/Desktop/scRNAseq/Signatures/Gay_SCLC-I.csv")
 t<-inf$SCLC_I
 
@@ -785,14 +796,14 @@ TBO_seurat<-AddModuleScore(
 
 FeaturePlot(TBO_seurat, features = c("Gay_SCLC-I1"), pt.size=0.2, reduction='umap',order=TRUE)+scale_color_viridis(option="rocket",direction=-1)& NoAxes()
 
-#### Converting to SCE to create Violin plots using scater package (for Fig. 6g)
+#### Converting to SCE to create Violin plots using scater package (for Fig. 5g)
 # Convert seurat object to SCE
 library(SingleCellExperiment)
 library(SummarizedExperiment)
 library(scater)
 sce<-as.SingleCellExperiment(TBO_seurat)
 TBO_seurat$`Gay_SCLC-I1`
-###################### Violin plotting human signatures of interest (for Fig. 3g) #####################
+###################### Violin plotting human signatures of interest (for Fig. 5g) #####################
 # Plot Gay_SCLC-I for example, replace with any signature of interest, adjust ylim to fit range of each signature 
 
 pheno_col<-c("brown2","darkorchid4","dodgerblue","#66A61E","orange","turquoise4","turquoise")
@@ -845,7 +856,7 @@ print(stat.test)
 # Add p-vals of interest for post-Hoc Dunns using Illustrator
 
 
-########## Add SCLC subtype signatures from 3 independent datasets to compare to Caris (George, Liu, Lissa) (Fig. 6e) ###########
+########## Add SCLC subtype signatures from 3 independent datasets to compare to Caris (George, Liu, Lissa) (Fig. 5e) ###########
 
 # First, signatures from George et al. 
 
@@ -973,7 +984,7 @@ TBO_seurat<-AddModuleScore(
   name = 'Lissa_Mixed')
 
 ###### Now lets see how signatures from Caris, George, Liu, and Lissa correlate with each other, and normal cell type signatures/ChIP targets in our mouse data ###
-## Correlation plot for Fig. 6e ##
+## Correlation plot for Fig. 5e ##
 library(ggplot2)
 library(pheatmap)
 
@@ -1007,7 +1018,7 @@ pheatmap(correlation_matrix,
          main = "Signature correlation in mouse TBO Allografts", cluster_cols = TRUE, cluster_rows=TRUE)
 
 
-######## Assess Therapeutic Targets (Fig. 6h) #########
+######## Assess Therapeutic Targets (Fig. 5h) #########
 VlnPlot(TBO_seurat,features = c("Dll3", "Ncam1", "Sez6", "Tacstd2"),group.by=c("Pheno"),cols=pheno_col,alpha=0.05, ncol=4)
 
 # Save object with all signatures before proceeding to CellTag analyses for Fig 4 ###
@@ -1016,7 +1027,7 @@ saveRDS(TBO_seurat,"05_2025_RPM_RPMA_Allos_Seurat.rds")
 
 ##############################################################################################################
 ##############################################################################################################
-# Begin CellTag/clonal analysis in FA space for Fig. 4 
+# Begin CellTag/clonal analysis in FA space for Fig. 3 
 ##############################################################################################################
 ##############################################################################################################
 
@@ -1071,12 +1082,12 @@ head(colnames(TBO_seurat))
 TBO_seurat[['fa']] <- CreateDimReducObject(test, key="FA_", assay = "RNA")
 TBO_seurat[['fa']]@cell.embeddings
 
-# Fig. 4c UMAPs #
+# Fig. 3c UMAPs #
 DimPlot(TBO_seurat,group.by='leiden_scVI_1.2',cols=my_colors, reduction='fa',label=FALSE,label.size=6)&NoAxes()
 DimPlot(TBO_seurat,group.by='Pheno',cols=pheno_col, reduction='fa',label=FALSE,label.size=6)&NoAxes()
 DimPlot(TBO_seurat,group.by='GenoCT',cols=my_colors, shuffle=TRUE,reduction='fa',label=FALSE,label.size=6)&NoAxes()
 
-# Fig. 4c UMAPs split by genotype #
+# Fig. 3c UMAPs split by genotype #
 a<-DimPlot(TBO_seurat,group.by="leiden_scVI_1.2",cols=my_colors,reduction='fa',shuffle=TRUE,split.by="Genotype")& NoAxes()&theme(legend.background = element_rect(fill = "transparent"),
                                                                                                                                  legend.box.background = element_rect(fill = "transparent"),
                                                                                                                                  panel.background = element_rect(fill = "transparent"),
@@ -1399,12 +1410,12 @@ table(TBO_seurat@meta.data$Robust, TBO_seurat@meta.data$GenoCT)
 
 ########################################################################
 # Save seurat object that has FA, UMAP, and diffusion pseudotime coordinates 
-saveRDS(TBO_seurat,"05_2025_RPM_RPMA_TBO_CellTag_Seurat_wSigs_FA_dpt_final.rds")
+saveRDS(TBO_seurat,"07_2025_RPM_RPMA_TBO_CellTag_Seurat_wSigs_FA_dpt_final.rds")
 ########################################################################
 
 # Read back in later
 setwd("/Users/abbieireland/Desktop/scRNAseq/042525_RPMTBO_CTpostCre_CellTag/RPMvRPMA_Seurat")
-TBO_seurat<-readRDS("050225_RPM_RPMA_TBO_CellTag_Seurat_wSigs_FA_dpt_final.rds")
+TBO_seurat<-readRDS("07_2025_RPM_RPMA_TBO_CellTag_Seurat_wSigs_FA_dpt_final.rds")
 
 
 # Subset just clones with >5 cells to analyze clonal dynamis #
@@ -1479,7 +1490,7 @@ test
 
 
 
-# Assess clones by leiden cluster for Fig. 4d #
+# Assess clones by leiden cluster for Fig. 3d #
 
 # First, just look at bar graph, no particular order #
 library(ggpubr)
@@ -1565,7 +1576,7 @@ t<-pheatmap(mat_trans,cutree_rows = 1,cutree_cols = 1,cellwidth = 5, cellheight 
 length(clone_order)
 
 
-# Now, plot clones by Leiden, ordered, final # (Fig. 4d)
+# Now, plot clones by Leiden, ordered, final # (Fig. 3d)
 Idents(clones)<-'leiden_scVI_1.2'
 
 x<-table(clones@meta.data$CellTag_Clone,Idents(clones))
@@ -1625,7 +1636,7 @@ p5<-rownames(p5@meta.data)
 u1<-rownames(u1@meta.data)
 u2<-rownames(u2@meta.data)
 
-# Patterns in FA space for Fig. 4e #
+# Patterns in FA space for Fig. 3e #
 
 DimPlot(TBO_seurat,group.by="CellTag_Clone",reduction='fa',order=TRUE, cells.highlight=p1,sizes.highlight=1, cols.highlight=c("orange"))+ggtitle("") & NoLegend() & NoAxes()
 DimPlot(TBO_seurat,group.by="CellTag_Clone",reduction='fa',order=TRUE, cells.highlight=p2,sizes.highlight=1, cols.highlight=c("green2"))+ggtitle("") & NoLegend() & NoAxes()
@@ -1637,7 +1648,7 @@ DimPlot(TBO_seurat,group.by="CellTag_Clone",reduction='fa',order=TRUE, cells.hig
 
 
 
-# For Fig. 4f overlap cell fate by pattern #
+# For Fig. 3f overlap cell fate by pattern #
 DimPlot(TBO_seurat,group.by="Genotype",cols=c("grey","grey"),reduction='fa')+ggtitle("") & NoLegend() & NoAxes()
 
 # Export to overlap with plain gray fa map
@@ -1670,11 +1681,11 @@ ggsave("Pheno_Pattern6.png", plot= clusterumap, width=5, height=4, dpi=300, bg =
 # Repeat above for each pattern, double check color vector each time
 
 
-# For Fig. 4g dpt psuedotime in FA space 
+# For Fig. 3g dpt psuedotime in FA space 
 library(viridis)
 FeaturePlot(TBO_seurat, features = c("dpt_pseudotime"), pt.size=0.01, reduction='fa',)+scale_color_viridis(option="viridis",direction=-1)& NoAxes()
 
-# For Fig. 4h overlaps, example for Pattern 6, repeat for each pattern and export image, overlay on gray FA in illustrator
+# For Fig. 3h overlaps, example for Pattern 6, repeat for each pattern and export image, overlay on gray FA in illustrator
 clusterumap<-
   FeaturePlot(u1, features = c("dpt_pseudotime"), pt.size=6, reduction='fa')+scale_color_viridis(option="turbo",direction=-1)+ggtitle("")& NoAxes()&theme(legend.position="none",
                                                                                                                                               panel.background = element_rect(fill = "transparent"),
