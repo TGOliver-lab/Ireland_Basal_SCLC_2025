@@ -1,6 +1,7 @@
 # RPM K5 Cre vs CGRP Cre Primary Tumor Analysis
 # Ireland et al, 2025
-# Related to Fig. 1 h-k and Extended Data Fig. 2e-i
+# Related to Extended Data Fig. 2g-n
+# Original file "Fig1_ExtFig2_RPMK5vsCGRP_Primary_Final.R" 
 
 setwd("/Users/abbieireland/Desktop/scRNAseq")
 # If using Isilon share
@@ -77,18 +78,18 @@ dim(test)
 RPM_K5vCGRP[['umap']] <- CreateDimReducObject(test, key="UMAP_", assay = "RNA")
 RPM_K5vCGRP[['umap']]@cell.embeddings
 
-# Plots to generate Fig 1h
+# Plots to generate Ext. Data Fig. 2g
 unid_cols<-c("darkorchid4","orange")
 DimPlot(RPM_K5vCGRP,split.by='Cre',group.by='Cre',cols=unid_cols,reduction='umap',shuffle=TRUE)+NoAxes()
 DimPlot(RPM_K5vCGRP,group.by='Cre',cols=unid_cols,reduction='umap',shuffle=TRUE)+NoAxes()
 
-# Plots to generate Fig 1i
+# Plots to generate Ext. Data Fig. 2i
 # UMAP by Leiden cluster
 colors<-c('#F39B7F99','brown1','#ff7f0e', 'turquoise', '#2ca02c', 'deepskyblue4', '#e7298a',  '#0aa6d8',  '#A0522D', '#a1c299', 'gold', '#984ea3', '#3C548899', '#377eb8',  '#d62728','navyblue', '#a1c299', 'purple','gray','maroon','gray20')
 DimPlot(RPM_K5vCGRP,group.by='leiden_scVI_1.3',cols=colors, reduction='umap',label=TRUE,label.size=6)&NoAxes()
 
-# Barplot by Leiden cluster
-### Look at distribution of leiden clusters in tumors by Cre (Fig. 1i)
+# Barplot by Cre
+### Look at distribution of leiden clusters in tumors by Cre (Ext. Data Fig. 2i)
 library(ggplot2)
 library(ggpubr)
 
@@ -109,17 +110,33 @@ p<-ggplot(proportions, aes(fill=Sample, y=Frequency, x=Cluster)) +
 
 p + scale_fill_manual(values=colors)+ theme_bw()+ theme(axis.text.y = element_text(size=20), axis.text.x=element_text(size=20), axis.title.x =element_text(size=20), axis.title.y = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=20))
 
+# Barplot by Leiden
+### Look at distribution of leiden clusters in tumors by Cre (Ext. Data Fig. 2n)
+##### What % of cells occupy what cluster for each sample ####
+x<-table(RPM_K5vCGRP@meta.data$leiden_scVI_1.3,Idents(RPM_K5vCGRP))
+proportions <- as.data.frame(100*prop.table(x, margin = 1))
+
+colnames(proportions)<-c("Cluster", "Sample", "Frequency")
+
+ggbarplot(proportions, x="Sample", y="Frequency", fill = "Sample", group = "Sample", ylab = "Frequency (percent)", xlab="Phase", palette =c("darkorchid4","orange"))+ theme_bw()+ facet_wrap(facets = "Cluster", scales="free_y", ncol =4)+ theme(axis.text.y = element_text(size=12)) +rotate_x_text(angle = 45)
+
+# Stacked
+p<-ggplot(proportions, aes(fill=Sample, y=Frequency, x=Cluster)) +
+  geom_bar(position="stack", stat="identity")
+
+p + scale_fill_manual(values=c("darkorchid4","orange"))+ theme_bw()+ theme(axis.text.y = element_text(size=20), axis.text.x=element_text(size=20), axis.title.x =element_text(size=20), axis.title.y = element_text(size=20), legend.text = element_text(size=20), legend.title = element_text(size=20))
+
 
 # For visualization of scores, log transform and normalize raw counts in Seurat
 DefaultAssay(RPM_K5vCGRP)<-'RNA'
 RPM_K5vCGRP<-NormalizeData(RPM_K5vCGRP)
 RPM_K5vCGRP
 
-# Visualize A, N, P expression by split violin plot for Fig. 1j
+# Visualize A, N, P expression by split violin plot for Ext. Data Fig. 2h
 library(viridis)
 VlnPlot(RPM_K5vCGRP,features = c("Ascl1","Neurod1","Pou2f3"), same.y.lims=FALSE,group.by=c("Genotype"),split.by=c("Cre"),split.plot=TRUE,cols=c("darkorchid4","orange"),pt.size=.01, ncol=3)
 
-# Example code to generate wilcoxon rank sum stat information for Fig. 1j, adjust y.max higher until p value can be visualized
+# Example code to generate wilcoxon rank sum stat information for Ext. Data Fig. 2h, adjust y.max higher until p value can be visualized
 a<-VlnPlot(RPM_K5vCGRP,features = c("Ascl1"), group.by=c("Cre"),same.y.lims=FALSE,cols=c("darkorchid4","orange"),pt.size=.01,alpha=0.05, ncol=1, y.max=5)
 # Add mean point and do wilcoxon rank sum test 
 a + stat_summary(fun = mean,
@@ -134,7 +151,7 @@ a + stat_summary(fun = mean,
 # Read in this table to convert between mouse and human homologs
 mouse94<-read.csv("Signatures/mouse94.csv")
 
-## Archetype signature analysis (Fig. 1k and Extended Data Fig. 2g) ##
+## Archetype signature analysis (Ext. Data Fig. 2l) ##
 
 arch<-read.csv("Signatures/Archetype_Sigs_Maddox.csv")
 a<-arch$SCLC.A
@@ -195,7 +212,7 @@ RPM_K5vCGRP<-AddModuleScore(
 
 #VlnPlot(RPM_K5vCGRP,features = c("A_Archetype1","A2_Archetype1","N_Archetype1","P_Archetype1"), group.by=c("Genotype"),same.y.lims=FALSE,split.by=c("Cre"),split.plot=TRUE,cols=c("darkorchid4","orange"),pt.size=.01, ncol=5)
 
-# Violin plot of A2 archetype by leiden cluster for Fig. 1k
+# Violin plot of A2 archetype by leiden cluster for Ext. Data Fig. 2o
 a<-VlnPlot(RPM_K5vCGRP,features = c("A2_Archetype1"), group.by=c("leiden_scVI_1.3"),same.y.lims=FALSE,cols=colors,pt.size=.01,alpha=0.05, ncol=1)
 # Add mean point
 a + stat_summary(fun = mean,
@@ -227,7 +244,7 @@ print(kruskal_result)
 
 # If significant, do Dunn's test (if set method to "none", that would be uncorrected)
 if (kruskal_result$p.value < 0.05) {
-  dunn_result <- dunnTest(expression ~ group, data = expr_values, method = "none")
+  dunn_result <- dunnTest(expression ~ group, data = expr_values, method = "bonferroni")
   print(dunn_result)
 }
 
@@ -250,7 +267,7 @@ dunn_df$p_stars <- sapply(dunn_df$P.adj, get_p_stars)
 print(dunn_df)
 
 
-## Example code to generate violin plot by Cre for Ext. Data. Fig. 3g ##
+## Example code to generate violin plot by Cre for Ext. Data. Fig. 2l ##
 # Adjust y.max per signature for best fit
 a<-VlnPlot(RPM_K5vCGRP,features = c("A_Archetype1"), group.by=c("Cre"),same.y.lims=FALSE,cols=c("darkorchid4","orange"),pt.size=.01,alpha=0.05, ncol=1, y.max=.3)
 # Add mean point and do wilcoxon rank sum test 
@@ -263,7 +280,7 @@ a + stat_summary(fun = mean,
 
 
 #############################################################################
-# Apply human A N P scRNA seq sigs from Chan et al (Extended Data Fig. 2h)
+# Apply human A N P scRNA seq sigs from Chan et al (Extended Data Fig. 2m)
 sc_sclc_sigs<-read.csv("Signatures/hSCLC_Chan_sigs.csv")
 sc_sclc_sigs
 
@@ -307,7 +324,7 @@ library(viridis)
 library(ggplot2)
 library(gridExtra)
 
-## Example code to generate violin plot by Cre for Ext. Data. Fig. 3g ##
+## Example code to generate violin plot by Cre for Ext. Data. Fig. 2m ##
 # Adjust y.max per signature for best fit
 a<-VlnPlot(RPM_K5vCGRP,features = c("hSCLC_A1"), group.by=c("Cre"),same.y.lims=FALSE,cols=c("darkorchid4","orange"),pt.size=.01,alpha=0.05, ncol=1, y.max=0.6)
 # Add mean point and do wilcoxon rank sum test 
@@ -319,7 +336,7 @@ a + stat_summary(fun = mean,
                  position = position_dodge(width = 0.9))+stat_compare_means(method = "wilcox.test",label = "p.signif",hide.ns = TRUE,comparisons = list(c("CGRP", "K5")))
 
 ###############################################
-## Apply A, N, P ChIP target genes as scores (Extended Data Fig. 1e)
+## Apply A, N, P ChIP target genes as scores (Extended Data Fig. 2j)
 
 chip<-read.csv("Signatures/ASCL1_NEUROD1_POU2F3_ChIP_Targets.csv")
 achip<-chip$Borromeo_ASCL1_Targets
@@ -344,7 +361,7 @@ RPM_K5vCGRP<-AddModuleScore(
   features = list(pchip_m),
   name = 'POU2F3_Targets')
 
-## Example code to generate violin plot by Cre for Ext. Data. Fig. 3e ##
+## Example code to generate violin plot by Cre for Ext. Data. Fig. 2j ##
 # Adjust y.max per signature for best fit
 a<-VlnPlot(RPM_K5vCGRP,features = c("ASCL1_Targets1"), group.by=c("Cre"),same.y.lims=FALSE,cols=c("darkorchid4","orange"),pt.size=.01,alpha=0.05, ncol=1, y.max=0.6)
 # Add mean point and do wilcoxon rank sum test 
@@ -374,7 +391,7 @@ RPM_K5vCGRP<-AddModuleScore(
   features = list(lum),
   name = 'Luminal_hillock')
 
-# Example code to generate Basal and Luminal Hillock signature violin plots for Fig. 1k with stats
+# Example code to generate Basal and Luminal Hillock signature violin plots for Ext. Data Fig. 2o with stats
 a<-VlnPlot(RPM_K5vCGRP,features = c("Luminal_hillock1"), group.by=c("leiden_scVI_1.3"),same.y.lims=FALSE,cols=colors,pt.size=.05,alpha=0.05, ncol=1)
 # Add mean point and do wilcoxon rank sum test 
 a + stat_summary(fun = mean,
@@ -397,7 +414,7 @@ print(kruskal_result)
 
 # If significant, do Dunn's test (if set method to "none", that would be uncorrected)
 if (kruskal_result$p.value < 0.05) {
-  dunn_result <- dunnTest(expression ~ group, data = expr_values, method = "none")
+  dunn_result <- dunnTest(expression ~ group, data = expr_values, method = "bonferroni")
   print(dunn_result)
 }
 
@@ -420,7 +437,7 @@ dunn_df$p_stars <- sapply(dunn_df$P.adj, get_p_stars)
 print(dunn_df)
 
 
-######## Add NE Score for Ext. Data Fig. 2f ##########
+######## Add NE Score for Ext. Data Fig. 2k ##########
 ### For NE score assignment, originally describe in Zhang, TLCR, 2018 ##
 
 #### Converting to SCE to Add NE Score ####
@@ -464,7 +481,7 @@ sce$NE_spearman <- apply(X = X, 2, ne_score,
 ne_score<-sce$NE_spearman
 RPM_K5vCGRP@meta.data$NE_spearman<-ne_score
 
-# Generate violin plot with wilcoxon test for Ext. Data Fig. 2f
+# Generate violin plot with wilcoxon test for Ext. Data Fig. 2k
 a<-VlnPlot(RPM_K5vCGRP,features = c("NE_spearman"), group.by=c("Cre"),same.y.lims=FALSE,cols=c("darkorchid4","orange"),pt.size=.05,alpha=0.3, ncol=1, y.max=1)
 # Add mean point and do wilcoxon rank sum test 
 a + stat_summary(fun = mean,
